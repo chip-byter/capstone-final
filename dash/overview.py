@@ -1,6 +1,5 @@
 import customtkinter as ctk
 
-from encryption import verify_user
 
 
 class Overview(ctk.CTkFrame):

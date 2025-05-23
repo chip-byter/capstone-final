@@ -3,7 +3,6 @@ from dash.overview import Overview
 from dash.transactions import Transactions
 from dash.reports import Reports
 from dash.activity import Activity
-from dash.book_grid import BookGrid
 
 def register_routes(navigator):
 

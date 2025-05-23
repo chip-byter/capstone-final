@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from navigate import NavigationController
-from urls import register_routes
+from core.navigate import NavigationController
+from core.urls import register_routes
 
 class Dashboard(ctk.CTkFrame):
     def __init__(self, parent, fg_color=None):

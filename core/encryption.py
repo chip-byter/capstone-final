@@ -1,6 +1,6 @@
 import hashlib
 import logging
-from database import Database
+from core.database import Database
 
 # Setup logging to file
 logging.basicConfig(
@@ -34,7 +34,7 @@ def verify_user(username, password):
     con = Database()
     hashpass = hash_string(password)
     stored_hash = con.fetch_one("SELECT password_hash FROM users WHERE username = %s", (username, )) 
-    return stored_hash[0] == hashpass
+    return stored_hash['password_hash'] == hashpass
     
 
 if __name__ == "__main__":

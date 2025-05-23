@@ -1,7 +1,5 @@
 import customtkinter as ctk
 
-from encryption import verify_user
-
 
 class Reports(ctk.CTkFrame):
     def __init__(self, parent, controller, fg_color=None):

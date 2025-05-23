@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from dashboard import Dashboard
-from encryption import verify_user
+from core.dashboard import Dashboard
+from core.encryption import verify_user
 
 
 class Login(ctk.CTkFrame):
@@ -54,7 +54,7 @@ class Login(ctk.CTkFrame):
 
         self.username = ctk.CTkEntry(self.form, placeholder_text="Username", corner_radius=0, border_width=0, font=self.regular_font)
         self.username.grid(row=0, column=0, pady=(0,10), sticky="ew")
-
+        self.username.bind("<Map>", self.search_field_focus)
 
         self.password = ctk.CTkEntry(self.form, placeholder_text="Password", corner_radius=0, border_width=0, show="*", font=self.regular_font) 
         self.password.grid(row=1, column=0, sticky="ew")
@@ -64,12 +64,15 @@ class Login(ctk.CTkFrame):
         self.footer.grid(row=2, column=0, pady=(20, 0), sticky="new")
         self.footer.grid_columnconfigure(0, weight=1)
 
-        
 
         self.signin_btn = ctk.CTkButton(self.footer, text="Sign In", height=30, command=self.authentication)
         self.signin_btn.grid(row=0, column=0, sticky="ew")
-        self.password.bind("<Return>", lambda e:self.authentication)
-    
+        self.password.bind("<Return>", lambda e:self.authentication())
+
+    def search_field_focus(self, event):
+        self.username.focus_set()
+
+
     def authentication(self):
         username = self.username.get()
         password = self.password.get()

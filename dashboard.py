@@ -11,7 +11,9 @@ class Dashboard(ctk.CTkFrame):
         self.grid_rowconfigure(1, weight=1)
 
         self.body_container = ctk.CTkFrame(self)
-        self.body_container.grid(row=1, column=0, pady=10, sticky="nsew")
+        self.body_container.grid(row=1, column=0, sticky="nsew")
+        self.body_container.grid_columnconfigure(0, weight=1)
+        self.body_container.grid_rowconfigure(0, weight=1)
         
         self.navigator = NavigationController(self.body_container)
         register_routes(self.navigator)

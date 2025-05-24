@@ -1,6 +1,7 @@
 import time
 import threading
 import customtkinter as ctk
+from core.widgets import center_window
 from core.dashboard import Dashboard
 from core.login import Login
 from dash.transactions import Transactions
@@ -11,6 +12,7 @@ class Organicer(ctk.CTk):
 
         self.title("Organicer")
         self.geometry("800x400")
+        center_window(self, 800, 400)
         # self.attributes('-fullscreen', True)
 
         self.grid_columnconfigure(0, weight=1)

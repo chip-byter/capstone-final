@@ -41,7 +41,10 @@ class Activity(ctk.CTkFrame):
             color = {
                 "Added": "#4CAF50",
                 "Updated": "#2196F3",
-                "Deleted": "#f44336"
+                "Deleted": "#f44336",
+                "Borrowed": "#FF9800",  
+                "Returned": "#009688",  
+                "Overdue": "#607D8B"   
             }.get(log["action"], "#607D8B")
 
             action_label = ctk.CTkLabel(card, text=log["action"], text_color=color, font=("Arial", 20, "bold"))

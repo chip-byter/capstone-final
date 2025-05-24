@@ -1,3 +1,13 @@
+SET Global event_scheduler = ON
+ 
+CREATE EVENT IF NOT EXISTS overdue_books
+ON SCHEDULE EVERY 1 MINUTE 
+DO UPDATE transactions
+SET status = 'Overdue'
+WHERE return_date IS NULL
+ 
+SET SQL_SAFE_UPDATES = 0;
+
 CREATE TABLE books (
     book_id INT AUTO_INCREMENT PRIMARY KEY,
     book_title VARCHAR(255) NOT NULL,

@@ -102,6 +102,27 @@ class BookGrid(ctk.CTkScrollableFrame):
             card = BookCard(self, book, on_click=on_card_click)
             card.grid(row=i // 4, column=i % 4, padx=10, pady=10)
 
+# ---------------------------------- BOOK GRID COMPONENT ----------------------------------------------
+class MessageBox(ctk.CTkToplevel):
+    def __init__(self, parent, title="Info", message="", on_close=None):
+        super().__init__(parent)
+        self.title(title)
+        self.geometry("300x150")
+        self.resizable(False, False)
+        self.grab_set()
+
+        self.label = ctk.CTkLabel(self, text=message, wraplength=280)
+        self.label.pack(pady=20, padx=20)
+
+        self.ok_btn = ctk.CTkButton(self, text="OK", command=self.close)
+        self.ok_btn.pack(pady=(0, 10))
+
+        self.on_close = on_close
+
+    def close(self):
+        if self.on_close:
+            self.on_close()
+        self.destroy()
 
 # ---------------------------------- CONFIRMDIALOG COMPONENT ----------------------------------------------
 class ConfirmationDialog(ctk.CTkToplevel):

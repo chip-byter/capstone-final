@@ -78,11 +78,17 @@ class Login(ctk.CTkFrame):
         password = self.password.get()
 
         if verify_user(username, password):
-            # self.navigation.navigate_to("dashboard_page")
-            self.container.grid_forget()
-            self.dashboard_page = Dashboard(self)
-            self.dashboard_page.grid(row=0, column=0, sticky="nsew")
-
             print("Access Granted")
+            self.navigation.show_dashboard()
         else:
             print("Access Denied")
+            
+        # if verify_user(username, password):
+        #     # self.navigation.navigate_to("dashboard_page")
+        #     self.container.grid_forget()
+        #     self.dashboard_page = Dashboard(self)
+        #     self.dashboard_page.grid(row=0, column=0, sticky="nsew")
+
+        #     print("Access Granted")
+        # else:
+        #     print("Access Denied")

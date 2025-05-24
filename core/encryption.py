@@ -40,9 +40,9 @@ def verify_user(username, password):
 if __name__ == "__main__":
     username = input("Enter username: ")
     password = input("Enter password: ")
-    # create_user(username, password)
+    create_user(username, password)
 
-    if verify_user(username, password):
-        print("Access Granted")
-    else:
-        print("Access Denied")
+    # if verify_user(username, password):
+    #     print("Access Granted")
+    # else:
+    #     print("Access Denied")

@@ -102,8 +102,12 @@ class ScanBookFrame(ctk.CTkFrame):
 
     def return_book_flow(self, user_id, book_id, book_title, user_name, user_email):
         self.db.return_book(user_id, book_id)
+        
+        try:
+            self.db.log_activity("Return", book_id, book_title, user_id, user_name)
+        except Exception as e:
+            print(f"[ LOG RETURN ERROR ] : {e}")
 
-        self.db.log_activity("Returned", book_id, book_title, user_id, user_name)
         title="Returning"
         message = f"{user_name} returned book {book_title}"
 
@@ -120,8 +124,10 @@ class ScanBookFrame(ctk.CTkFrame):
             self.display_error("Failed to borrow the book.")
             self.start_rfid_listener()
             return
-        
-        self.db.log_activity("Borrowed", book_id, book_title, user_id, user_name)
+        try:
+            self.db.log_activity("Borrowed", book_id, book_title, user_id, user_name)
+        except Exception as e:
+            print(f"[ LOG BORROW ERROR ] : {e}")
         
         formatted_due = due_date.strftime("%B %d, %Y")
         title = "Lending"

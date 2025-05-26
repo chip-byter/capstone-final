@@ -46,20 +46,13 @@ class Database:
             return self.cursor.fetchall()
         except Error as e:
             print(f"[FETCH ALL ERROR] : {e}")
-        # finally:
-        #     if self is not None and self.con.is_connected():
-        #         self.cursor.close()
-        #         self.con.close()
-        #         print("Database is closed!")
+    
     
     def log_activity(self, action, book_id, book_title, user_id=None, user_name=None):
         try:
-            self.execute_query("""
-                INSERT INTO activity_log (action, book_id, book_title,  user_id, user_name))
-                VALUES (%s, %s, %s, %s, %s)
-            """, (action, book_id, book_title,  user_id, user_name))
+            self.execute_query("INSERT INTO activity_log (action, book_id, book_title, user_id, user_name) VALUES (%s, %s, %s, %s, %s)",
+                               (action, book_id, book_title, user_id, user_name))
             self.connection.commit()
-            print(f"[LOGGED]: {action} - {book_id} - {book_title} - User: {user_name or 'System'}")
         except Exception as e:
             print(f"[LOG ERROR]: {e}")
 
@@ -69,12 +62,19 @@ class Database:
         return self.cursor.fetchone()
 
     def get_book_status(self, book_id, user_id):
-        self.cursor.execute("""
+        query = """
             SELECT status FROM transactions
             WHERE book_id = %s AND user_id = %s
             ORDER BY timestamp DESC LIMIT 1
-        """, (book_id, user_id))
-        result = self.cursor.fetchone()
+        """
+        values =  (book_id, user_id)
+        # self.cursor.execute("""
+        #     SELECT status FROM transactions
+        #     WHERE book_id = %s AND user_id = %s
+        #     ORDER BY timestamp DESC LIMIT 1
+        # """, (book_id, user_id))
+        # result = self.cursor.fetchone()
+        result = self.fetch_one(query, values)
         return result["status"] if result else "Available"
     
     def borrow_book(self, user_id, user_name, user_email, book_id):
@@ -88,7 +88,7 @@ class Database:
             self.cursor.execute("UPDATE books SET status = 'Unavailable' WHERE book_id = %s AND copy <= 0", (book_id,))
             self.connection.commit()
         except Error as e:
-            self.connect.rollback()  
+            self.connection.rollback()  
             print(f"Borrow Book Error: {e}")
         return due_date
 
@@ -105,7 +105,7 @@ class Database:
             self.cursor.execute("UPDATE books SET status = 'Available' WHERE book_id = %s AND copy > 0", (book_id,))
             self.connection.commit()
         except Error as e:
-            self.connect.rollback()  
+            self.connection.rollback()  
             print(f"Return Book Error: {e}")
 
     def get_overdue_books(self):
@@ -153,10 +153,10 @@ if __name__ == "__main__":
     # results = db.fetch_one("SELECT password_hash FROM users WHERE username = %s", ('staff', ))
     # results = db.execute_query("")
     # print(results[0])
-    title = "1984"
-    book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
-    print(book_id["book_id"])
-    # db.log_activity("Added", book_id, title)
+    # title = "1984"
+    # book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
+    # print(book_id["book_id"])
     
-    # results = db.fetch_one("SELECT password_hash FROM users WHERE username = %s", ('admin', ))
-    # print(results)
+    db.execute_query("SELECT COUNT(*) FROM transactions WHERE status = 'Borrowed'")
+    results = db.cursor.fetchone()
+    print(results['COUNT(*)'])

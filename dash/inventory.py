@@ -24,6 +24,13 @@ class Inventory(ctk.CTkFrame):
         self.add_btn = ctk.CTkButton(self.transactions, text="Add", width=80, command=self.open_book_form)
         self.add_btn.grid(row=0, column=1)
 
+        self.grid_frame = BookGrid(self, books=self.load_and_display_books(), on_card_click=self.on_book_click)
+        self.grid_frame.grid(row=1, column=0, pady=10, sticky="nsew") 
+        self.grid_frame.grid_columnconfigure(0, weight=0)   
+        self.grid_frame.grid_columnconfigure(2, weight=0)   
+        self.grid_frame.grid_columnconfigure(3, weight=0)   
+        self.grid_frame.grid_columnconfigure(4, weight=0)  
+        
     def open_book_form(self):
         BookForm(self, on_update=self.refresh_books)
 
@@ -55,13 +62,9 @@ class Inventory(ctk.CTkFrame):
         else: 
             if hasattr(self, "msg_container"):
                 self.msg_container.destroy()
+            return all_books
 
-            self.grid_frame = BookGrid(self, books=all_books, on_card_click=self.on_book_click)
-            self.grid_frame.grid(row=1, column=0, pady=10, sticky="nsew") 
-            self.grid_frame.grid_columnconfigure(0, weight=0)   
-            self.grid_frame.grid_columnconfigure(2, weight=0)   
-            self.grid_frame.grid_columnconfigure(3, weight=0)   
-            self.grid_frame.grid_columnconfigure(4, weight=0)   
+             
 
     # def show_book_details(self, book_data):
     #     # MAKE THIS TOPLEVEL WINDOW

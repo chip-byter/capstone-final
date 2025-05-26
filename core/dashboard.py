@@ -29,12 +29,12 @@ class Dashboard(ctk.CTkFrame):
         self.buttons_container.grid_columnconfigure(3, weight=1)
         self.buttons_container.grid_columnconfigure(4, weight=1)
 
-        # self.overview_btn = ctk.CTkButton(
-        #     self.buttons_container, 
-        #     text="Overview", 
-        #     fg_color="transparent",
-        #     command=lambda: self.switch("overview_page", self.overview_btn))
-        # self.overview_btn.grid(row=0, column=0, sticky="ew")
+        self.overview_btn = ctk.CTkButton(
+            self.buttons_container, 
+            text="Overview", 
+            fg_color="transparent",
+            command=lambda: self.switch("overview_page", self.overview_btn))
+        self.overview_btn.grid(row=0, column=0, sticky="ew")
 
         self.books_btn = ctk.CTkButton(
             self.buttons_container, 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     root = ctk.CTk()
     
     root.geometry("800x400")
-
+    
     loginPage = Dashboard(root)
     loginPage.pack(expand=True, fill="both")
     root.mainloop()

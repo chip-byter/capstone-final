@@ -26,7 +26,7 @@ def create_user(username, password):
     finally:
         if con is not None and con.connection.is_connected():
             con.cursor.close()
-            con.con.close()
+            con.connection.close()
             print("Database is closed!")
 
 

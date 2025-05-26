@@ -98,10 +98,13 @@ class BookGrid(ctk.CTkScrollableFrame):
         self.display_books(books, on_card_click)
 
     def display_books(self, books, on_card_click):
-        for i, book in enumerate(books):
-            card = BookCard(self, book, on_click=on_card_click)
-            card.grid(row=i // 4, column=i % 4, padx=10, pady=10)
-
+        try:
+            for i, book in enumerate(books):
+                card = BookCard(self, book, on_click=on_card_click)
+                card.grid(row=i // 4, column=i % 4, padx=10, pady=10)
+        except TypeError as e:
+            print(e)
+            return
 # ---------------------------------- MESSAGEBOX COMPONENT ----------------------------------------------
 class MessageBox(ctk.CTkToplevel):
     def __init__(self, parent, title="Info", message="", on_close=None):

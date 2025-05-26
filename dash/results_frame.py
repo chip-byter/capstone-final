@@ -11,7 +11,6 @@ class ResultsFrame(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # Top Bar: Back Button + SearchBar
         self.top_bar = ctk.CTkFrame(self, fg_color="transparent")
         self.top_bar.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
         self.top_bar.grid_columnconfigure(0, weight=1)
@@ -23,7 +22,6 @@ class ResultsFrame(ctk.CTkFrame):
         self.searchbar = SearchBar(self.top_bar, on_search=self.search_books)
         self.searchbar.grid(row=0, column=0, sticky="e")
 
-        # Results area
         self.results_area = ctk.CTkFrame(self, fg_color="transparent")
         self.results_area.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
 

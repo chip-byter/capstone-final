@@ -8,7 +8,7 @@ class Database:
             host="localhost",
             user="root",
             password="admin123",
-            database="capstone"
+            database="testing"
         )
        self.cursor = self.connection.cursor(dictionary=True)
 
@@ -78,7 +78,7 @@ class Database:
         return result["status"] if result else "Available"
     
     def borrow_book(self, user_id, user_name, user_email, book_id):
-        due_date = datetime.now() + timedelta(minutes=1)
+        due_date = datetime.now() + timedelta(hours=8)
         try:
             self.cursor.execute("""
                 INSERT INTO transactions (user_id, user_name, user_email, book_id, status, timestamp, due_date)
@@ -157,6 +157,4 @@ if __name__ == "__main__":
     # book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
     # print(book_id["book_id"])
     
-    db.execute_query("SELECT COUNT(*) FROM transactions WHERE status = 'Borrowed'")
-    results = db.cursor.fetchone()
-    print(results['COUNT(*)'])
+    print(db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (1, )))

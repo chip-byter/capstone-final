@@ -1,3 +1,4 @@
+from datetime import datetime
 import customtkinter as ctk
 from core.database import Database
 
@@ -61,18 +62,20 @@ class Overview(ctk.CTkFrame):
         self.returns.grid_columnconfigure(0, weight=1)
         self.returns.grid_rowconfigure(1, weight=1)
         ctk.CTkLabel(self.returns, text="UPCOMING RETURN DUES", font=("Helvetica", 15, 'bold')).grid(row=0, column=0, pady=10)
-        self.list = ctk.CTkScrollableFrame(self.returns, fg_color="transparent")
-        self.list.grid(row=1, column=0, sticky="nsew", padx=2, pady=2)
+        self.returns_list = ctk.CTkScrollableFrame(self.returns, fg_color="transparent")
+        self.returns_list.grid(row=1, column=0, sticky="nsew", padx=2, pady=2)
 
         self.activities = ctk.CTkFrame(self.notif_frame, fg_color="transparent", border_width=1)
         self.activities.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
         self.activities.grid_columnconfigure(0, weight=1)
         self.activities.grid_rowconfigure(1, weight=1)
         ctk.CTkLabel(self.activities, text="RECENT ACTIVITIES", font=("Helvetica", 15, 'bold')).grid(row=0, column=0, pady=10)
-        self.list = ctk.CTkScrollableFrame(self.activities, fg_color="transparent")
-        self.list.grid(row=1, column=0, sticky="nsew", padx=2, pady=2)
+        self.acts_list = ctk.CTkScrollableFrame(self.activities, fg_color="transparent")
+        self.acts_list.grid(row=1, column=0, sticky="nsew", padx=2, pady=2)
         
-        
+        self.show_logs()
+        self.show_borrowed()
+
     def total_bks(self):    
         self.db.execute_query("SELECT COUNT(*) FROM books")
         results = self.db.cursor.fetchone()
@@ -87,3 +90,73 @@ class Overview(ctk.CTkFrame):
         self.db.execute_query("SELECT COUNT(*) FROM transactions WHERE status = 'Overdue'")
         results = self.db.cursor.fetchone()
         return results['COUNT(*)']
+    
+    def fetch_logs(self, limit=20):
+        db = Database()
+        query = "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT %s"
+        return db.fetch_all(query, (limit, ))
+        
+
+    def show_logs(self):
+        logs = self.fetch_logs()
+
+        for log in logs:
+            card = ctk.CTkFrame(self.acts_list, corner_radius=10, border_width=1)
+            card.pack(fill="x", padx=10, pady=5)
+
+            color = {
+                "Added": "#4CAF50",
+                "Updated": "#2196F3",
+                "Deleted": "#f44336",
+                "Borrowed": "#FF9800",  
+                "Returned": "#009688",  
+                "Overdue": "#607D8B"   
+            }.get(log["action"], "#607D8B")
+
+            action_label = ctk.CTkLabel(card, text=log["action"], text_color=color, font=("Arial", 15, "bold"))
+            action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
+
+            book_info = f"{log['book_title']} (ID: {log['book_id']})"
+            ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
+
+            performer = "System"
+            timestamp = datetime.strptime(str(log["timestamp"]), "%Y-%m-%d %H:%M:%S")
+            time_str = timestamp.strftime("%b %d, %Y - %I:%M %p")
+
+            footer = f"By: {performer}  •  {time_str}"
+            ctk.CTkLabel(card, text=footer, font=("Arial", 11, "italic")).grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")
+
+    def fetch_borrowed(self, limit=20):
+        db = Database()
+        query = "SELECT * FROM transactions WHERE status = 'Borrowed' ORDER BY timestamp DESC LIMIT %s"
+        return db.fetch_all(query, (limit, ))
+        
+
+    def show_borrowed(self):
+        db = Database()
+        books = self.fetch_borrowed()
+
+        for entry in books:
+            card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1)
+            card.pack(fill="x", padx=10, pady=5)
+
+            book = db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (entry["book_id"], ))
+
+            due_date = entry["due_date"]  
+            now = datetime.now()
+
+            delta = due_date - now  
+            total_hours = delta.total_seconds() / 3600  
+            hours = int(total_hours)
+        
+            color = "#FF5252" if hours <= 2 else "#FFC107" if hours <= 5 else "#4CAF50"
+            
+            action_label = ctk.CTkLabel(card, text=f"Due in {hours} hours", text_color=color, font=("Arial", 15, "bold"))
+            action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
+
+            book_info = f"{book['book_title']} (ID: {entry['book_id']})"
+            ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
+
+            borrower = entry["user_name"]
+            footer = f"By: {borrower}"
+            ctk.CTkLabel(card, text=footer, font=("Arial", 11, "italic")).grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")

@@ -19,18 +19,15 @@ class Inventory(ctk.CTkFrame):
         self.search = SearchBar(self.transactions, on_search=self.search_books)
         self.search.grid(row=0, column=0)    
 
-        self.load_and_display_books()
         
         self.add_btn = ctk.CTkButton(self.transactions, text="Add", width=80, command=self.open_book_form)
         self.add_btn.grid(row=0, column=1)
 
-        self.grid_frame = BookGrid(self, books=self.load_and_display_books(), on_card_click=self.on_book_click)
-        self.grid_frame.grid(row=1, column=0, pady=10, sticky="nsew") 
-        self.grid_frame.grid_columnconfigure(0, weight=0)   
-        self.grid_frame.grid_columnconfigure(2, weight=0)   
-        self.grid_frame.grid_columnconfigure(3, weight=0)   
-        self.grid_frame.grid_columnconfigure(4, weight=0)  
+        self.results_area = ctk.CTkFrame(self, fg_color="transparent")
+        self.results_area.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
         
+        self.load_and_display_books()
+
     def open_book_form(self):
         BookForm(self, on_update=self.refresh_books)
 
@@ -44,6 +41,9 @@ class Inventory(ctk.CTkFrame):
         
         if hasattr(self, 'grid_frame'):
             self.grid_frame.destroy()
+
+        for widget in self.results_area.winfo_children():
+            widget.destroy()
 
         if not all_books:
             self.msg_container = ctk.CTkFrame(self)
@@ -61,14 +61,14 @@ class Inventory(ctk.CTkFrame):
             
         else: 
             if hasattr(self, "msg_container"):
-                self.msg_container.destroy()
-            return all_books
+                self.no_result_label.destroy()
+                self.no_result_sublabel.destroy()
 
-             
+            if hasattr(self, "book_grid"):
+                self.book_grid.destroy()
 
-    # def show_book_details(self, book_data):
-    #     # MAKE THIS TOPLEVEL WINDOW
-    #     print(f"Selected Book: {book_data[1]}\nAuthor: {book_data[2]}\nCopies: {book_data[3]}")
+            self.book_grid = BookGrid(self.results_area, books=all_books, on_card_click=self.on_book_click)
+            self.book_grid.pack(fill="both", expand=True)
 
     def search_books(self, query):
         self.load_and_display_books(query)
@@ -78,11 +78,9 @@ class Inventory(ctk.CTkFrame):
         return db.fetch_all("SELECT * FROM books")
 
     def on_book_click(self, book_data):
-        # Open the details toplevel window
         BookDetailsWindow(self, book_data, on_update=self.refresh_books)
 
     def refresh_books(self):
-        # Re-fetch and refresh the book grid
         for widget in self.grid_frame.winfo_children():
             widget.destroy()
         self.grid_frame.destroy()

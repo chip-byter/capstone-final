@@ -50,19 +50,19 @@ class Dashboard(ctk.CTkFrame):
             command=lambda: self.switch("transactions_page", self.transactions_btn))
         self.transactions_btn.grid(row=0, column=1, sticky="ew")
 
-        self.activity_btn = ctk.CTkButton(
-            self.buttons_container, 
-            text="Activity Log", 
-            fg_color="transparent",
-            command=lambda: self.switch("activity_page", self.activity_btn))
-        self.activity_btn.grid(row=0, column=3, sticky="ew")
-
-        # self.reports_btn = ctk.CTkButton(
+        # self.activity_btn = ctk.CTkButton(
         #     self.buttons_container, 
-        #     text="Reports", 
+        #     text="Activity Log", 
         #     fg_color="transparent",
-        #     command=lambda: self.switch("reports_page", self.reports_btn))
-        # self.reports_btn.grid(row=0, column=4, sticky="ew")
+        #     command=lambda: self.switch("activity_page", self.activity_btn))
+        # self.activity_btn.grid(row=0, column=3, sticky="ew")
+
+        self.reports_btn = ctk.CTkButton(
+            self.buttons_container, 
+            text="Reports", 
+            fg_color="transparent",
+            command=lambda: self.switch("reports_page", self.reports_btn))
+        self.reports_btn.grid(row=0, column=3, sticky="ew")
 
         # self.navigator.navigate_to("overview_page")
         # self.overview_btn.configure(fg_color="#1F6AA5")
@@ -75,7 +75,7 @@ class Dashboard(ctk.CTkFrame):
         )
         self.logout_btn.grid(row=0, column=4, sticky="ew")
 
-        self.switch("transactions_page", self.transactions_btn)
+        self.switch("overview_page", self.overview_btn)
 
     def switch(self, page_name, actv_btn):
         for each_widget in self.buttons_container.winfo_children():

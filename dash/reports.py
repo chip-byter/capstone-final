@@ -1,8 +1,10 @@
 from datetime import datetime
+from io import BytesIO
 import re
 import customtkinter as ctk
 from tkinter import ttk
 import pandas as pd 
+from core.emailsys import send_excel_report
 from core.database import Database
 import openpyxl
 
@@ -35,7 +37,7 @@ class Reports(ctk.CTkFrame):
         self.search_button = ctk.CTkButton(self.filter_frame, text="Generate Report", width=80, command=self.generate_report)
         self.search_button.grid(row=0, column=3, padx=10)
 
-        self.export_excel = ctk.CTkButton(self.filter_frame, text="Export Excel", width=80, command=self.export_as_excel)
+        self.export_excel = ctk.CTkButton(self.filter_frame, text="Send Report", width=80, command=self.send_report)
         self.export_excel.grid(row=0, column=4, padx=10)
 
         self.tree_frame = ctk.CTkFrame(self)
@@ -111,6 +113,7 @@ class Reports(ctk.CTkFrame):
         formatted_type = re.sub(r'\s+', '_', report_type.strip().lower())
 
         # Add date to filename
+
         filename = f"report_{formatted_type}_{current_date}.xlsx"
         df = pd.DataFrame(self.report_data, columns=self.columns)
 
@@ -121,10 +124,22 @@ class Reports(ctk.CTkFrame):
             # Access the workbook and sheet to add a date in A1
             workbook = writer.book
             worksheet = writer.sheets['Report']
+            for col in ['A', 'B', 'C', 'D', 'E']:
+                worksheet.column_dimensions[col].width = 20
             worksheet['A1'] = f"{report_type}"
             worksheet['B1'] = f"Report generated on: {current_date}"
 
         print(f"Exported to [ {filename} ]")
+     
         
+
+        
+    def send_report(self):
+        excel_generator = self.export_as_excel()
+        send_excel_report('delacruz.ellezir@gmail.com', 
+                          'Organicer Report', 
+                          'Please see the attached file of the automated library report.', 
+                          excel_generator,
+                          'report.xlsx')
 
   

@@ -121,8 +121,8 @@ class BookForm(ctk.CTkToplevel):
                     book_data["id"]
                 ))
                 db.connection.commit()
-                db.log_activity("Updated", book_data["id"], book_data["title"])
-                print(f"Book {book_data["title"]} updated successfully.")
+                db.log_activity("Updated", book_data['id'], book_data['title'])
+                print(f"Book {book_data['title']} updated successfully.")
             except Exception as e:
                 print("Update failed:", e)
 

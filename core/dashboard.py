@@ -31,7 +31,8 @@ class Dashboard(ctk.CTkFrame):
 
         self.overview_btn = ctk.CTkButton(
             self.buttons_container, 
-            text="Overview", 
+            text="Overview",
+            text_color="black", 
             fg_color="transparent",
             command=lambda: self.switch("overview_page", self.overview_btn))
         self.overview_btn.grid(row=0, column=0, sticky="ew")
@@ -39,6 +40,7 @@ class Dashboard(ctk.CTkFrame):
         self.books_btn = ctk.CTkButton(
             self.buttons_container, 
             text="Manage Books", 
+            text_color="black",
             fg_color="transparent",
             command=lambda: self.switch("inventory_page", self.books_btn))
         self.books_btn.grid(row=0, column=2, sticky="ew")
@@ -46,6 +48,7 @@ class Dashboard(ctk.CTkFrame):
         self.transactions_btn = ctk.CTkButton(
             self.buttons_container, 
             text="Transactions", 
+            text_color="black",
             fg_color="transparent",
             command=lambda: self.switch("transactions_page", self.transactions_btn))
         self.transactions_btn.grid(row=0, column=1, sticky="ew")
@@ -60,6 +63,7 @@ class Dashboard(ctk.CTkFrame):
         self.reports_btn = ctk.CTkButton(
             self.buttons_container, 
             text="Reports", 
+            text_color="black",
             fg_color="transparent",
             command=lambda: self.switch("reports_page", self.reports_btn))
         self.reports_btn.grid(row=0, column=3, sticky="ew")
@@ -70,6 +74,7 @@ class Dashboard(ctk.CTkFrame):
         self.logout_btn = ctk.CTkButton(
             self.buttons_container,
             text="Logout",
+            text_color="black",
             fg_color="transparent",
             command=self.logout
         )
@@ -82,7 +87,7 @@ class Dashboard(ctk.CTkFrame):
             if isinstance(each_widget, ctk.CTkButton):
                 each_widget.configure(fg_color="transparent")
 
-        actv_btn.configure(fg_color="#1F6AA5")
+        actv_btn.configure(fg_color="#1F6AA5", text_color="black",)
         self.navigator.navigate_to(page_name)
 
     def logout(self):

@@ -50,7 +50,6 @@ CREATE TABLE transactions (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
 CREATE TABLE activity_log (
     id INT AUTO_INCREMENT PRIMARY KEY,
     action VARCHAR(50) NOT NULL,

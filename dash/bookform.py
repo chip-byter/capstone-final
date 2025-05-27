@@ -8,7 +8,7 @@ class BookForm(ctk.CTkToplevel):
         self.parent = parent
         self.title("Update Book Details")
         center_window(self, 450, 400)
-        self.resizable(False, False)
+        # self.resizable(False, False)
         self.focus()
         self.on_update = on_update
         self.book_data = book_data or {}

@@ -1,3 +1,5 @@
+from datetime import datetime
+import re
 import customtkinter as ctk
 from tkinter import ttk
 import pandas as pd 
@@ -9,15 +11,18 @@ class Reports(ctk.CTkFrame):
         super().__init__(parent, fg_color="transparent")
         self.navigation = controller
         self.db = Database()
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         self.filter_frame = ctk.CTkFrame(self)
-        self.filter_frame.pack(pady=10, padx=20, fill="x")
+        self.filter_frame.grid(row=0, column=0)
 
         self.report_type_option = ctk.CTkOptionMenu(
             self.filter_frame,
-            values=["Borrowed Books", "Overdue Books", "Returned Books", "Inventory Summary"],
+            values=["Borrowed Books", "Overdue Books", "Returned Books"],
             command=self.generate_report
         )
+
         self.report_type_option.set("Borrowed Books")
         self.report_type_option.grid(row=0, column=0, padx=10)
 
@@ -27,12 +32,16 @@ class Reports(ctk.CTkFrame):
         self.end_date = ctk.CTkEntry(self.filter_frame, placeholder_text="End Date (YYYY-MM-DD)")
         self.end_date.grid(row=0, column=2, padx=10)
 
-        self.search_button = ctk.CTkButton(self.filter_frame, text="Generate Report", command=self.generate_report)
+        self.search_button = ctk.CTkButton(self.filter_frame, text="Generate Report", width=80, command=self.generate_report)
         self.search_button.grid(row=0, column=3, padx=10)
 
-        # Report Table
+        self.export_excel = ctk.CTkButton(self.filter_frame, text="Export Excel", width=80, command=self.export_as_excel)
+        self.export_excel.grid(row=0, column=4, padx=10)
+
         self.tree_frame = ctk.CTkFrame(self)
-        self.tree_frame.pack(padx=20, pady=10, fill="both", expand=True)
+        self.tree_frame.grid(row=1, column=0, pady=10, padx=5, sticky="nsew")
+        self.tree_frame.grid_rowconfigure(0, weight=1)
+        self.tree_frame.grid_columnconfigure(0, weight=1)
 
         self.columns = ("book_id", "user_name", "timestamp", "due_date", "status")
         self.tree = ttk.Treeview(self.tree_frame, columns=self.columns, show='headings')
@@ -47,22 +56,9 @@ class Reports(ctk.CTkFrame):
 
         for col in self.columns:
             self.tree.heading(col, text=column_titles[col])
-            self.tree.column(col, anchor="center")
+            self.tree.column(col, anchor="center", stretch=True, width=100)
 
         self.tree.pack(fill="both", expand=True)
-
-        # Export Buttons
-        self.export_frame = ctk.CTkFrame(self)
-        self.export_frame.pack(pady=10)
-
-        self.export_pdf = ctk.CTkButton(self.export_frame, text="Export PDF", command=self.export_as_pdf)
-        self.export_pdf.grid(row=0, column=0, padx=10)
-
-        self.export_csv = ctk.CTkButton(self.export_frame, text="Export CSV", command=self.export_as_csv)
-        self.export_csv.grid(row=0, column=1, padx=10)
-
-        self.export_excel = ctk.CTkButton(self.export_frame, text="Export Excel", command=self.export_as_excel)
-        self.export_excel.grid(row=0, column=2, padx=10)
 
         self.report_data = []
 
@@ -109,25 +105,26 @@ class Reports(ctk.CTkFrame):
             ]
             self.tree.insert('', 'end', values=row_values)
 
-    def export_as_csv(self):
-        # df = pd.DataFrame(self.report_data, columns=self.columns)
-        # df.to_csv("report.csv", index=False)
-        pass
-
     def export_as_excel(self):
+        report_type = self.report_type_option.get()
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        formatted_type = re.sub(r'\s+', '_', report_type.strip().lower())
+
+        # Add date to filename
+        filename = f"report_{formatted_type}_{current_date}.xlsx"
         df = pd.DataFrame(self.report_data, columns=self.columns)
-        df.to_excel("report.xlsx", index=False)
 
-    def export_as_pdf(self):
-        # df = pd.DataFrame(self.report_data, columns=self.columns)
-        # pdf = FPDF()
-        # pdf.add_page()
-        # pdf.set_font("Arial", size=10)
-        # pdf.cell(200, 10, txt="Library Report", ln=True, align='C')
+        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
+        # Write the main data starting from row 2 (row index 1)
+            df.to_excel(writer, index=False, startrow=1, sheet_name='Report')
 
-        # for i, row in df.iterrows():
-        #     line = " | ".join(str(value) for value in row)
-        #     pdf.cell(200, 10, txt=line, ln=True)
+            # Access the workbook and sheet to add a date in A1
+            workbook = writer.book
+            worksheet = writer.sheets['Report']
+            worksheet['A1'] = f"{report_type}"
+            worksheet['B1'] = f"Report generated on: {current_date}"
 
-        # pdf.output("report.pdf")
-        pass
+        print(f"Exported to [ {filename} ]")
+        
+
+  

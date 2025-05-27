@@ -71,7 +71,13 @@ class Transactions(ctk.CTkFrame):
     
     def handle_overdue_books():
         db = Database()
-        overdues = db.get_overdue_books()
+
+        query = """
+        SELECT * FROM transactions
+        WHERE status = 'Overdue' AND overdue_notified = FALSE;
+        """
+        overdues = db.fetch_all(query)
+
         for book in overdues:
             book_id = book["book_id"]
             book_title = book["book_title"]
@@ -87,7 +93,7 @@ class Transactions(ctk.CTkFrame):
             body_html = core.emailsys.generate_email_template(user_name, book_title, body_text)
             core.emailsys.send_notification_email(user_email, subject, body_text, body_html)
             
-
+        
         print(f"Checked and sent emails for {len(overdues)} overdue book(s).")
             
 if __name__ == "__main__":

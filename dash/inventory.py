@@ -39,9 +39,6 @@ class Inventory(ctk.CTkFrame):
         if query:
             all_books = db.fetch_all("SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s", (f"%{query}%", f"%{query}%"))
         
-        if hasattr(self, 'grid_frame'):
-            self.grid_frame.destroy()
-
         for widget in self.results_area.winfo_children():
             widget.destroy()
 
@@ -81,9 +78,9 @@ class Inventory(ctk.CTkFrame):
         BookDetailsWindow(self, book_data, on_update=self.refresh_books)
 
     def refresh_books(self):
-        for widget in self.grid_frame.winfo_children():
+        for widget in self.book_grid.winfo_children():
             widget.destroy()
-        self.grid_frame.destroy()
+        self.book_grid.destroy()
 
-        self.grid_frame = BookGrid(self, books=self.get_books(), on_card_click=self.on_book_click)
-        self.grid_frame.grid(row=1, column=0, pady=10, sticky="nsew")
+        self.book_grid = BookGrid(self, books=self.get_books(), on_card_click=self.on_book_click)
+        self.book_grid.grid(row=1, column=0, pady=10, sticky="nsew")

@@ -108,18 +108,6 @@ class Database:
             self.connection.rollback()  
             print(f"Return Book Error: {e}")
 
-    def get_overdue_books(self):
-        query = """
-            SELECT tr.book_id, b.book_title AS book_title, tr.user_email, tr.user_name, tr.due_date
-            FROM transactions tr
-            JOIN books b ON tr.book_id = b.book_id
-            WHERE tr.status = 'Overdue'
-        """
-        
-        self.cursor.execute(query)
-        results = self.cursor.fetchall()
-
-        return results
 
     def reset_table(self, table_name:str):
         """ DELETE ALL ROWS OF THE TABLE
@@ -144,7 +132,7 @@ class Database:
 
     def generate_path(self, title:str):
         modified_title = title.lower().replace(" ", "-") + ".jpg"
-        path = f"images/{modified_title}"
+        path = f"assets/book_covers/{modified_title}"
         return path
     
 if __name__ == "__main__":

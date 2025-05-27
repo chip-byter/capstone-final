@@ -113,7 +113,7 @@ class MessageBox(ctk.CTkToplevel):
         # self.geometry("300x150")
         center_window(self, 300, 150)
         self.resizable(False, False)
-        self.grab_set()
+        # self.grab_set()
 
         self.label = ctk.CTkLabel(self, text=message, wraplength=280)
         self.label.pack(pady=20, padx=20)
@@ -138,7 +138,7 @@ class ConfirmationDialog(ctk.CTkToplevel):
         super().__init__(parent)
         self.title("Confirmation")
         center_window(self, 300, 150)
-        self.grab_set()
+        # self.grab_set()
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)

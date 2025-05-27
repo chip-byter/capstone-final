@@ -13,7 +13,7 @@ class BookForm(ctk.CTkToplevel):
         self.on_update = on_update
         self.book_data = book_data or {}
 
-        self.grab_set()
+        # self.grab_set()
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -122,7 +122,7 @@ class BookForm(ctk.CTkToplevel):
                 ))
                 db.connection.commit()
                 db.log_activity("Updated", book_data["id"], book_data["title"])
-                print(f"Book {book_data["title"]} updated successfully.")
+                print(f"Book {book_data['title']} updated successfully.")
             except Exception as e:
                 print("Update failed:", e)
 

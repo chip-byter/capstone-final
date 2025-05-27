@@ -4,7 +4,8 @@ CREATE EVENT IF NOT EXISTS overdue_books
 ON SCHEDULE EVERY 1 MINUTE 
 DO UPDATE transactions
 SET status = 'Overdue'
-WHERE return_date IS NULL
+WHERE due_date < CURRENT_TIMESTAMP
+AND status = "Borrowed"
  
 SET SQL_SAFE_UPDATES = 0;
 
@@ -31,9 +32,10 @@ CREATE TABLE transactions (
     user_name VARCHAR(100),
     user_email VARCHAR(100),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    due_date DATE,
-    status ENUM('Borrowed', 'Returned'),
-    
+    due_date DATETIME,
+    return_date DATETIME,
+    status ENUM('Borrowed', 'Returned', 'Overdue'),
+    overdue_notified TINYINT(1) DEFAULT 0,
     FOREIGN KEY (book_id) REFERENCES books(book_id)
 );
 

@@ -8,7 +8,7 @@ class Database:
             host="localhost",
             user="root",
             password="admin123",
-            database="testing"
+            database="Library"
         )
        self.cursor = self.connection.cursor(dictionary=True)
 
@@ -19,11 +19,7 @@ class Database:
             return self.cursor.lastrowid
         except Error as e:
             print(f"[QUERY ERROR] : {e}")
-        # finally:
-        #     if self is not None and self.con.is_connected():
-        #         self.cursor.close()
-        #         self.con.close()
-        #         print("Database is closed!")
+        
 
     def fetch_one(self, query:str, params=None):
         """ RETURNS ONE RESULT FROM THE QUERY

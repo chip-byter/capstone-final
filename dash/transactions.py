@@ -79,8 +79,9 @@ class Transactions(ctk.CTkFrame):
         overdues = db.fetch_all(query)
 
         for book in overdues:
+            title = db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (book["book_id"], ))
             book_id = book["book_id"]
-            book_title = book["book_title"]
+            book_title = title["book_title"]
             user_name = book["user_name"]
             user_email = book["user_email"]
             formatted_due = book["due_date"].strftime("%B %d, %Y")

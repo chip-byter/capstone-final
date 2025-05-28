@@ -25,7 +25,7 @@ def send_notification_email(to_email, subject, body_text, body_html=None):
         server.login(from_email, password)
         server.send_message(msg)
 
-def send_excel_report(recipient, subject, body, excel_generator, filename=None):
+def send_excel_report(recipient, subject, body, file_buffer, filename=None):
     from_email = "uncovered.comrade@gmail.com"
     password = "tdkm eayf mdpe ougg"
 
@@ -35,11 +35,16 @@ def send_excel_report(recipient, subject, body, excel_generator, filename=None):
     msg['To'] = recipient
     msg.set_content(body)
 
-    msg.add_attachment(excel_generator.read(), maintype='application', subtype='vnd.opnxmlformats-officedocument.spreadsheetml.sheet', filename=filename)
+    msg.add_attachment(
+        file_buffer.read(),
+        maintype='application',
+        subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        filename=filename
+    )
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465)as smtp:
-      smtp.login(from_email,password)
-      smtp.send_message(msg)
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        smtp.login(from_email, password)
+        smtp.send_message(msg)
 
       
 def generate_email_template(user_name, book_title, message, color="#1f6aa5"):

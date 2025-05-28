@@ -96,7 +96,6 @@ class Reports(ctk.CTkFrame):
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # Insert new rows from dict records
         for record in self.report_data:
             row_values = [
                 record.get("book_id", ""),
@@ -111,17 +110,13 @@ class Reports(ctk.CTkFrame):
         report_type = self.report_type_option.get()
         current_date = datetime.now().strftime("%Y-%m-%d")
         formatted_type = re.sub(r'\s+', '_', report_type.strip().lower())
-
-        # Add date to filename
-
         filename = f"report_{formatted_type}_{current_date}.xlsx"
+
         df = pd.DataFrame(self.report_data, columns=self.columns)
+        buffer = BytesIO()
 
-        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-        # Write the main data starting from row 2 (row index 1)
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, startrow=1, sheet_name='Report')
-
-            # Access the workbook and sheet to add a date in A1
             workbook = writer.book
             worksheet = writer.sheets['Report']
             for col in ['A', 'B', 'C', 'D', 'E']:
@@ -129,17 +124,20 @@ class Reports(ctk.CTkFrame):
             worksheet['A1'] = f"{report_type}"
             worksheet['B1'] = f"Report generated on: {current_date}"
 
-        print(f"Exported to [ {filename} ]")
+        buffer.seek(0)  # Reset pointer to the beginning
+        return buffer, filename
      
         
 
         
     def send_report(self):
-        excel_generator = self.export_as_excel()
-        send_excel_report('delacruz.ellezir@gmail.com', 
-                          'Organicer Report', 
-                          'Please see the attached file of the automated library report.', 
-                          excel_generator,
-                          'report.xlsx')
+        buffer, filename = self.export_as_excel()
+        send_excel_report(
+            recipient='delacruz.ellezir@gmail.com',
+            subject='Organicer Report',
+            body='Please see the attached file of the automated library report.',
+            file_buffer=buffer,
+            filename=filename
+        )
 
   

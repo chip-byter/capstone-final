@@ -25,7 +25,6 @@ class Organicer(ctk.CTk):
         self.loginPage = Login(self, self)
         self.loginPage.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         
-
         self.overdue_checker()
         self.dashboardPage = None  # will create on login success
 

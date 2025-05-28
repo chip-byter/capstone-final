@@ -88,7 +88,6 @@ class Dashboard(ctk.CTkFrame):
     def logout(self):
         self.navigation.show_login()
 
-    
 
 if __name__ == "__main__":
     root = ctk.CTk()

@@ -121,6 +121,9 @@ class Reports(ctk.CTkFrame):
             # Access the workbook and sheet to add a date in A1
             workbook = writer.book
             worksheet = writer.sheets['Report']
+            for col in ['A', 'B', 'C', 'D', 'E']:
+                worksheet.column_dimensions[col].width = 20
+                
             worksheet['A1'] = f"{report_type}"
             worksheet['B1'] = f"Report generated on: {current_date}"
 

@@ -8,17 +8,15 @@ class Database:
             host="localhost",
             user="root",
             password="admin123",
-            database="testing"
+            database="capstone"
         )
        self.cursor = self.connection.cursor(dictionary=True)
 
     def execute_query(self, query, params=None):
-        try:
-            self.cursor.execute(query, params)
-            print("Successful Query!")
-            return self.cursor.lastrowid
-        except Error as e:
-            print(f"[QUERY ERROR] : {e}")
+        self.cursor.execute(query, params)
+        print("Successful Query!")
+        return self.cursor.lastrowid
+     
         # finally:
         #     if self is not None and self.con.is_connected():
         #         self.cursor.close()
@@ -48,10 +46,10 @@ class Database:
             print(f"[FETCH ALL ERROR] : {e}")
     
     
-    def log_activity(self, action, book_id, book_title, user_id=None, user_name=None):
+    def log_activity(self, action, rfid, user_id=None, user_name=None):
         try:
-            self.execute_query("INSERT INTO activity_log (action, book_id, book_title, user_id, user_name) VALUES (%s, %s, %s, %s, %s)",
-                               (action, book_id, book_title, user_id, user_name))
+            self.execute_query("INSERT INTO activity_log (action, rfid, user_id, user_name) VALUES (%s, %s, %s, %s)",
+                               (action, rfid, user_id, user_name))
             self.connection.commit()
         except Exception as e:
             print(f"[LOG ERROR]: {e}")
@@ -144,5 +142,19 @@ if __name__ == "__main__":
     # title = "1984"
     # book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
     # print(book_id["book_id"])
-    query = "SELECT book_id, user_name, timestamp, due_date, status FROM transactions WHERE status = 'Borrowed'"
-    print(db.fetch_all(query))
+    query = "old"
+    qs = "SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s"
+    param = (f"%{query}%", f"%{query}%")
+    result = db.fetch_all(qs, param)
+    books = {}
+    for book in result:
+        book_id = book['book_id']
+        new_query = "SELECT item_id, rfid, status FROM book_items WHERE book_id = %s"
+        rfid_and_status = db.fetch_one(new_query, (book_id, ))
+        if rfid_and_status:
+            books = {**book, **rfid_and_status}
+        else:
+            books = book
+
+    print(books)
+   

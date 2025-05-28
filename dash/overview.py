@@ -96,14 +96,27 @@ class Overview(ctk.CTkFrame):
         query = "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT %s"
         return db.fetch_all(query, (limit, ))
         
+    def get_book_details(self, log):
+        results = []
+        book_id_row = self.db.fetch_one("SELECT book_id FROM book_items WHERE rfid = %s", (log['rfid'],))
+        if book_id_row:
+            book_id = book_id_row['book_id']
+            book_row = self.db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (book_id,))
+            if book_row:
+                book_title = book_row['book_title']
+                results.append({
+                    "book_id": book_id,
+                    "book_title": book_title
+                })
+        return results
+        
 
     def show_logs(self):
         logs = self.fetch_logs()
-
         for log in logs:
             card = ctk.CTkFrame(self.acts_list, corner_radius=10, border_width=1)
             card.pack(fill="x", padx=10, pady=5)
-
+            
             color = {
                 "Added": "#4CAF50",
                 "Updated": "#2196F3",
@@ -115,8 +128,14 @@ class Overview(ctk.CTkFrame):
 
             action_label = ctk.CTkLabel(card, text=log["action"], text_color=color, font=("Arial", 15, "bold"))
             action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
+            
+            book_info = ""
+            # for book_id, book_title in self.get_book_details(log):
+                # print(f"{book_id}: {book_title}")
 
-            book_info = f"{log['book_title']} (ID: {log['book_id']})"
+            for key in self.get_book_details(log):
+                book_info = f"{key['book_title']} (ID: {key['book_id']})"
+            
             ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
 
             performer = "System"

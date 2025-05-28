@@ -10,11 +10,21 @@ CREATE TABLE transactions (
     FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE
 );
 
+CREATE TABLE book_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id VARCHAR(20),
+    rfid VARCHAR(20) UNIQUE,
+    status ENUM('Available', 'Borrowed', 'Lost', 'Damaged') DEFAULT 'available',
+    date_added DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE activity_log (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
+    rfid VARCHAR(20),
     action VARCHAR(100), 
-    book_id VARCHAR(20),
-    description TEXT,
+    user_id VARCHAR(50),
+    user_name VARCHAR(255),
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (book_id) REFERENCES books(book_id) ON DELETE SET NULL
+    FOREIGN KEY (rfid) REFERENCES book_items(rfid) ON DELETE SET NULL
 );

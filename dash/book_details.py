@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from core.database import Database
-from dash.bookform import BookForm
+from dash.newbookform import BookForm
 from core.widgets import center_window
 
 
@@ -86,6 +86,7 @@ class BookDetailsWindow(ctk.CTkToplevel):
                 self.on_update()
             self.destroy()
 
+        # BookForm(self, self.book_data, on_update=after_update)
         BookForm(self, self.book_data, on_update=after_update)
 
     def delete_book(self):

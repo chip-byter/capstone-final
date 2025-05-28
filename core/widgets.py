@@ -48,9 +48,10 @@ class BookCard(ctk.CTkFrame):
         
         book_title = book_data['book_title']
         book_author = book_data['book_author']
+        book_item_id = book_data.get('item_id', 'NULL')
+        book_status = book_data.get('status', 'UNKOWN')
         book_cover = book_data['cover']
-        book_copies = book_data['copy']
-
+        # self.grid_columnconfigure(0, weight=1)
         # Load book cover image
         try:
             # img = Image.open(book_data[4]).resize((60, 80))
@@ -77,8 +78,8 @@ class BookCard(ctk.CTkFrame):
         self.book_author = ctk.CTkLabel(self.book_metadata, text=self.text_author, font=("Helvetica", 12, 'italic'), wraplength=120)
         self.book_author.grid(row=1, column=0)
 
-        self.copy_num = ctk.CTkLabel(self, text=f"Copies: {book_copies}", bg_color="transparent", font=("helvetica", 12, "bold"), corner_radius=10)
-        self.copy_num.grid(row=0, column=0, padx=5, pady=(5,0), sticky="ew")
+        self.status = ctk.CTkLabel(self, text=f"Status: {book_status} [ {book_item_id} ]", bg_color="transparent", font=("helvetica", 12, "bold"), corner_radius=10)
+        self.status.grid(row=0, column=0, padx=5, pady=(5,0), sticky="ew")
 
         self.bind_all_widgets("<Button-1>", lambda e: on_click(book_data) if on_click else None)
 

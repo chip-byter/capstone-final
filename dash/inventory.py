@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from dash.book_details import BookDetailsWindow
-from dash.bookform import BookForm
+from dash.newbookform import BookForm
 from core.database import Database
 from core.widgets import SearchBar, BookGrid
 from core.encryption import verify_user

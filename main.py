@@ -9,7 +9,8 @@ from dash.transactions import Transactions
 class Organicer(ctk.CTk):
     def __init__(self):
         super().__init__()
-
+        
+        
         self.title("Organicer")
         self.geometry("800x400")
         center_window(self, 800, 400)
@@ -24,7 +25,6 @@ class Organicer(ctk.CTk):
         self.loginPage = Login(self, self)
         self.loginPage.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         
-
         self.overdue_checker()
         self.dashboardPage = None  # will create on login success
 
@@ -49,5 +49,6 @@ class Organicer(ctk.CTk):
         threading.Thread(target=loop, daemon=True).start()
 
 if __name__ == "__main__":
+    ctk.set_appearance_mode("light")
     app = Organicer()
     app.mainloop()

@@ -7,7 +7,7 @@ class UserDetails(ctk.CTkToplevel):
         super().__init__(parent)
         self.title("User Details")
         center_window(self, 350, 250)
-        self.grab_set()
+        # self.grab_set()
         self.on_submit = on_submit
 
         self.grid_columnconfigure(0, weight=1)
@@ -37,7 +37,11 @@ class UserDetails(ctk.CTkToplevel):
 
         self.submit_btn = ctk.CTkButton(self.buttons, text="Confirm", width=80, command=self.submit)
         self.submit_btn.grid(row=0, column=0)
- 
+        self.after(100, self.set_grab)
+
+    def set_grab(self):
+        self.grab_set()
+        
     def get_user_details(self):
         return {
         "id": self.user_id.get(),

@@ -144,5 +144,5 @@ if __name__ == "__main__":
     # title = "1984"
     # book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
     # print(book_id["book_id"])
-    
-    print(db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (1, )))
+    query = "SELECT book_id, user_name, timestamp, due_date, status FROM transactions WHERE status = 'Borrowed'"
+    print(db.fetch_all(query))

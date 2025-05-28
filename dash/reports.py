@@ -1,8 +1,10 @@
 from datetime import datetime
+from io import BytesIO
 import re
 import customtkinter as ctk
 from tkinter import ttk
 import pandas as pd 
+from core.emailsys import send_excel_report
 from core.database import Database
 import openpyxl
 
@@ -35,7 +37,7 @@ class Reports(ctk.CTkFrame):
         self.search_button = ctk.CTkButton(self.filter_frame, text="Generate Report", width=80, command=self.generate_report)
         self.search_button.grid(row=0, column=3, padx=10)
 
-        self.export_excel = ctk.CTkButton(self.filter_frame, text="Export Excel", width=80, command=self.export_as_excel)
+        self.export_excel = ctk.CTkButton(self.filter_frame, text="Send Report", width=80, command=self.send_report)
         self.export_excel.grid(row=0, column=4, padx=10)
 
         self.tree_frame = ctk.CTkFrame(self)
@@ -94,7 +96,6 @@ class Reports(ctk.CTkFrame):
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # Insert new rows from dict records
         for record in self.report_data:
             row_values = [
                 record.get("book_id", ""),
@@ -109,25 +110,34 @@ class Reports(ctk.CTkFrame):
         report_type = self.report_type_option.get()
         current_date = datetime.now().strftime("%Y-%m-%d")
         formatted_type = re.sub(r'\s+', '_', report_type.strip().lower())
-
-        # Add date to filename
         filename = f"report_{formatted_type}_{current_date}.xlsx"
+
         df = pd.DataFrame(self.report_data, columns=self.columns)
+        buffer = BytesIO()
 
-        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-        # Write the main data starting from row 2 (row index 1)
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, startrow=1, sheet_name='Report')
-
-            # Access the workbook and sheet to add a date in A1
             workbook = writer.book
             worksheet = writer.sheets['Report']
             for col in ['A', 'B', 'C', 'D', 'E']:
                 worksheet.column_dimensions[col].width = 20
-                
             worksheet['A1'] = f"{report_type}"
             worksheet['B1'] = f"Report generated on: {current_date}"
 
-        print(f"Exported to [ {filename} ]")
+        buffer.seek(0)  # Reset pointer to the beginning
+        return buffer, filename
+     
         
+
+        
+    def send_report(self):
+        buffer, filename = self.export_as_excel()
+        send_excel_report(
+            recipient='delacruz.ellezir@gmail.com',
+            subject='Organicer Report',
+            body='Please see the attached file of the automated library report.',
+            file_buffer=buffer,
+            filename=filename
+        )
 
   

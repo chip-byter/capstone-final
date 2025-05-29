@@ -54,8 +54,11 @@ class Reports(ctk.CTkFrame):
         self.export_excel = ctk.CTkButton(self.export_btns, text="Send Report", width=100, command=self.send_report)
         self.export_excel.grid(row=0, column=2, padx=10, sticky="e")
 
+        self.total_label = ctk.CTkLabel(self.export_btns, text="Total : ", width=150, anchor="w", fg_color="gray")
+        self.total_label.grid(row=0, column=0, padx=10, sticky="w")
+
         self.pagination_frame = ctk.CTkFrame(self.export_btns, fg_color="transparent")
-        self.pagination_frame.grid(row=0, column=1, pady=10)
+        self.pagination_frame.grid(row=0, column=1)
 
         self.prev_button = ctk.CTkButton(self.pagination_frame, text=" < Previous ", fg_color="transparent" , width=80, hover=None, text_color="black", command=self.previous_page)
         self.prev_button.grid(row=0, column=0, padx=5)
@@ -65,8 +68,6 @@ class Reports(ctk.CTkFrame):
 
         self.next_button = ctk.CTkButton(self.pagination_frame, text=" Next > ", fg_color="transparent" , width=80, hover=None, text_color="black", command=self.next_page)
         self.next_button.grid(row=0, column=2, padx=5)
-
-
 
         self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "status")
         self.tree = ttk.Treeview(self.tree_frame, columns=self.columns, show='headings')
@@ -167,6 +168,7 @@ class Reports(ctk.CTkFrame):
                 }
 
         self.report_data = self.db.fetch_all(query, tuple(params))
+        self.total_label.configure(text=f"Total {selected}: {len(self.report_data)}")
         self.update_treeview_headers(column_titles)
         self.current_page = 1
         self.populate_treeview()
@@ -228,7 +230,12 @@ class Reports(ctk.CTkFrame):
         buffer.seek(0) 
         return buffer, filename
      
+    def open_report_form(self):
+        self.report_form = ctk.CTkToplevel(self)
+        self.report_form.title("Data Report Settings")
         
+
+
     def send_report(self):
         buffer, filename = self.export_as_excel()
         send_excel_report(

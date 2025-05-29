@@ -115,17 +115,17 @@ class Overview(ctk.CTkFrame):
     def show_logs(self):
         logs = self.fetch_logs()
         for log in logs:
-            card = ctk.CTkFrame(self.acts_list, corner_radius=10, border_width=1)
-            card.pack(fill="x", padx=10, pady=5)
-            
             color = {
-                "Added": "#4CAF50",
-                "Updated": "#2196F3",
-                "Deleted": "#f44336",
-                "Borrowed": "#FF9800",  
-                "Returned": "#009688",  
-                "Overdue": "#607D8B"   
+                "Added": "#28AA00",
+                "Updated": "#1877C5",
+                "Deleted": "#BB0F0F",
+                "Borrowed": "#BE4A14",  
+                "Returned": "#076837",  
+                "Overdue": "#5A076B"   
             }.get(log["action"], "#607D8B")
+            
+            card = ctk.CTkFrame(self.acts_list, corner_radius=10, border_width=1, border_color=color)
+            card.pack(fill="x", padx=10, pady=5)
 
             action_label = ctk.CTkLabel(card, text=log["action"], text_color=color, font=("Arial", 15, "bold"))
             action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
@@ -173,8 +173,6 @@ class Overview(ctk.CTkFrame):
         books = self.fetch_borrowed()
 
         for entry in books:
-            card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1)
-            card.pack(fill="x", padx=10, pady=5)
 
             due_date = entry["due_date"]  
             now = datetime.now()
@@ -183,7 +181,10 @@ class Overview(ctk.CTkFrame):
             total_hours = delta.total_seconds() / 3600  
             hours = int(total_hours)
         
-            color = "#FF5252" if hours <= 2 else "#FFC107" if hours <= 5 else "#4CAF50"
+            color = "#800707" if hours <= 2 else "#470881" if hours <= 5 else "#09428B"
+            
+            card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1, border_color=color)
+            card.pack(fill="x", padx=10, pady=5)
             
             action_label = ctk.CTkLabel(card, text=f"Due in {hours} hours", text_color=color, font=("Arial", 15, "bold"))
             action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")

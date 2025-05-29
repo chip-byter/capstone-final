@@ -90,7 +90,7 @@ if __name__ == "__main__":
     
     root.geometry("800x400")
     
-    loginPage = Dashboard(root)
+    loginPage = Dashboard(root, root)
     loginPage.pack(expand=True, fill="both")
     root.mainloop()
 

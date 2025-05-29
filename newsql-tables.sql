@@ -38,7 +38,7 @@ CREATE TABLE `transactions` (
   `user_id` VARCHAR(50) NOT NULL,
   `user_name` VARCHAR(100) DEFAULT NULL,
   `user_email` VARCHAR(100) DEFAULT NULL,
-  `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `borrowed_date` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `due_date` DATETIME DEFAULT NULL,
   `return_date` DATETIME DEFAULT NULL,
   `status` ENUM('Borrowed','Returned','Overdue') DEFAULT 'Borrowed',

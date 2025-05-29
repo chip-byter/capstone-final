@@ -46,10 +46,27 @@ class Reports(ctk.CTkFrame):
 
         # EXPORT EXCEL BUTTON
         self.export_btns = ctk.CTkFrame(self)
-        self.export_btns.grid(row=2, column=0, sticky="e")
+        self.export_btns.grid(row=2, column=0, sticky="ew")
+        self.export_btns.grid_columnconfigure(0, weight=1)
+        self.export_btns.grid_columnconfigure(1, weight=1)
+        self.export_btns.grid_columnconfigure(2, weight=1)
 
         self.export_excel = ctk.CTkButton(self.export_btns, text="Send Report", width=100, command=self.send_report)
-        self.export_excel.grid(row=0, column=5, padx=10)
+        self.export_excel.grid(row=0, column=2, padx=10, sticky="e")
+
+        self.pagination_frame = ctk.CTkFrame(self.export_btns, fg_color="transparent")
+        self.pagination_frame.grid(row=0, column=1, pady=10)
+
+        self.prev_button = ctk.CTkButton(self.pagination_frame, text=" < Previous ", fg_color="transparent" , width=80, hover=None, text_color="black", command=self.previous_page)
+        self.prev_button.grid(row=0, column=0, padx=5)
+
+        self.page_label = ctk.CTkLabel(self.pagination_frame, text="Page 1")
+        self.page_label.grid(row=0, column=1, padx=5)
+
+        self.next_button = ctk.CTkButton(self.pagination_frame, text=" Next > ", fg_color="transparent" , width=80, hover=None, text_color="black", command=self.next_page)
+        self.next_button.grid(row=0, column=2, padx=5)
+
+
 
         self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "status")
         self.tree = ttk.Treeview(self.tree_frame, columns=self.columns, show='headings')
@@ -69,6 +86,12 @@ class Reports(ctk.CTkFrame):
         self.tree.pack(fill="both", expand=True)
 
         self.update_filter_options("Transactions")
+
+        # PAGINATION
+        self.rows_per_page = 10
+        self.current_page = 1
+        self.total_pages = 1
+
         self.report_data = []
 
     def update_filter_options(self, selected_mode):
@@ -145,11 +168,12 @@ class Reports(ctk.CTkFrame):
 
         self.report_data = self.db.fetch_all(query, tuple(params))
         self.update_treeview_headers(column_titles)
+        self.current_page = 1
         self.populate_treeview()
 
 
     def update_treeview_headers(self, column_titles):
-        self.tree.delete(*self.tree.get_children())  # Clear data
+        self.tree.delete(*self.tree.get_children())  
         self.tree["columns"] = self.columns
         for col in self.tree["columns"]:
             self.tree.heading(col, text=column_titles[col])
@@ -159,12 +183,32 @@ class Reports(ctk.CTkFrame):
     def populate_treeview(self):
         self.tree.delete(*self.tree.get_children())
 
-        for record in self.report_data:
+        start_index = (self.current_page - 1) * self.rows_per_page
+        end_index = start_index + self.rows_per_page
+        paginated_data = self.report_data[start_index:end_index]
+
+        for record in paginated_data:
             values = [record.get(col, "") for col in self.columns]
             self.tree.insert('', 'end', values=values)
 
+        self.total_pages = max(1, (len(self.report_data) + self.rows_per_page - 1) // self.rows_per_page)
+        self.page_label.configure(text=f"Page {self.current_page} of {self.total_pages}")
+
+        self.prev_button.configure(state="normal" if self.current_page > 1 else "disabled")
+        self.next_button.configure(state="normal" if self.current_page < self.total_pages else "disabled")
+
+    def next_page(self):
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            self.populate_treeview()
+
+    def previous_page(self):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.populate_treeview()
+
     def export_as_excel(self):
-        mode = self.filter_mode.get()
+        mode = self.report_option.get()
         current_date = datetime.now().strftime("%Y-%m-%d")
         formatted_type = re.sub(r'\s+', '_', mode.strip().lower())
         filename = f"report_{formatted_type}_{current_date}.xlsx"
@@ -174,14 +218,14 @@ class Reports(ctk.CTkFrame):
 
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, startrow=1, sheet_name='Report')
-            workbook = writer.book
+            # workbook = writer.book
             worksheet = writer.sheets['Report']
             for col in ['A', 'B', 'C', 'D', 'E']:
-                worksheet.column_dimensions[col].width = 20
+                worksheet.column_dimensions[col].width = 30
             worksheet['A1'] = f"{mode}"
             worksheet['B1'] = f"Report generated on: {current_date}"
 
-        buffer.seek(0)  # Reset pointer to the beginning
+        buffer.seek(0) 
         return buffer, filename
      
         

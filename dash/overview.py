@@ -131,8 +131,6 @@ class Overview(ctk.CTkFrame):
             action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
             
             book_info = ""
-            # for book_id, book_title in self.get_book_details(log):
-                # print(f"{book_id}: {book_title}")
 
             for key in self.get_book_details(log):
                 book_info = f"{key['book_title']} (ID: {key['book_id']})"
@@ -165,7 +163,7 @@ class Overview(ctk.CTkFrame):
         JOIN book_items bi ON bi.rfid = t.rfid
         JOIN books b ON b.book_id = bi.book_id
         WHERE t.status = 'Borrowed' ORDER BY borrowed_date DESC LIMIT %s
-"""
+        """
         
         return db.fetch_all(query, (limit, ))
         

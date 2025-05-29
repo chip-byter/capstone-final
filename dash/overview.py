@@ -22,33 +22,14 @@ class Overview(ctk.CTkFrame):
         self.summary_frame.grid_columnconfigure(0, weight=1)
         self.summary_frame.grid_columnconfigure(1, weight=1)
         self.summary_frame.grid_columnconfigure(2, weight=1)
+        self.summary_frame.grid_columnconfigure(3, weight=1)
+        self.summary_frame.grid_columnconfigure(4, weight=1)
 
-        self.total = ctk.CTkFrame(self.summary_frame, border_width=1)
-        self.total.grid(row=0, column=0, padx=10, sticky="nsew")
-        self.total.grid_columnconfigure(0, weight=1)
-        self.total.grid_rowconfigure(0, weight=1)
-        self.total.grid_rowconfigure(1, weight=1)
-        self.total_books = ctk.CTkLabel(self.total, text=self.total_bks(), font=("Helvetica", 30, 'bold'))
-        self.total_books.grid(row=0, column=0, pady=(5, 0), sticky="s")
-        ctk.CTkLabel(self.total, text="Total Books", font=("Helvetica", 13, 'bold')).grid(row=1, column=0, pady=(0, 5), sticky="n")
-
-        self.borrowed = ctk.CTkFrame(self.summary_frame, border_width=1)
-        self.borrowed.grid(row=0, column=1, padx=10, sticky="nsew")
-        self.borrowed.grid_columnconfigure(0, weight=1)
-        self.borrowed.grid_rowconfigure(0, weight=1)
-        self.borrowed.grid_rowconfigure(1, weight=1)
-        self.borrowed_books = ctk.CTkLabel(self.borrowed, text=self.total_borrowed(), font=("Helvetica", 30, 'bold'))
-        self.borrowed_books.grid(row=0, column=0, pady=(5, 0), sticky="s")
-        ctk.CTkLabel(self.borrowed, text="Borrowed Books", font=("Helvetica", 13, 'bold')).grid(row=1, column=0, pady=(0, 5), sticky='n')
-
-        self.overdue = ctk.CTkFrame(self.summary_frame, border_width=1)
-        self.overdue.grid(row=0, column=2, padx=10, sticky="nsew")
-        self.overdue.grid_columnconfigure(0, weight=1)
-        self.overdue.grid_rowconfigure(0, weight=1)
-        self.overdue.grid_rowconfigure(1, weight=1)
-        self.overdue_books = ctk.CTkLabel(self.overdue, text=self.total_due(), font=("Helvetica", 30, 'bold'))
-        self.overdue_books.grid(row=0, column=0, pady=(5, 0), sticky='s')
-        ctk.CTkLabel(self.overdue, text="Overdue Books", font=("Helvetica", 13, 'bold')).grid(row=1, column=0, pady=(0, 5), sticky='n')
+        self.create_summary_container("Total Books", 0, self.total_bks())
+        self.create_summary_container("Available Books", 1, self.total_available())
+        self.create_summary_container("Borrowed Books", 2, self.total_borrowed())
+        self.create_summary_container("Overdue Books", 3, self.total_due())
+        self.create_summary_container("Lost Books", 4, self.total_lost())
 
         self.notif_frame = ctk.CTkFrame(self.body_container, fg_color="transparent")
         self.notif_frame.grid(row=1, column=0, pady=(5,10), padx=10, sticky="nsew")
@@ -76,11 +57,26 @@ class Overview(ctk.CTkFrame):
         self.show_logs()
         self.show_borrowed()
 
+    def create_summary_container(self, title, column, total_number):
+        self.frame = ctk.CTkFrame(self.summary_frame, border_width=1)
+        self.frame.grid(row=0, column=column, padx=10, sticky="nsew")
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_rowconfigure(1, weight=1)
+        self.frame_books = ctk.CTkLabel(self.frame, text=total_number, font=("Helvetica", 30, 'bold'))
+        self.frame_books.grid(row=0, column=0, pady=(5, 0), sticky='s')
+        ctk.CTkLabel(self.frame, text=title, font=("Helvetica", 13, 'bold')).grid(row=1, column=0, pady=(0, 5), sticky='n')   
+
     def total_bks(self):    
         self.db.execute_query("SELECT COUNT(*) FROM books")
         results = self.db.cursor.fetchone()
         return results['COUNT(*)']
-
+    
+    def total_available(self):
+        self.db.execute_query("SELECT COUNT(*) FROM book_items WHERE status = 'Available'")
+        results = self.db.cursor.fetchone()
+        return results['COUNT(*)']
+    
     def total_borrowed(self):
         self.db.execute_query("SELECT COUNT(*) FROM transactions WHERE status = 'Borrowed'")
         results = self.db.cursor.fetchone()
@@ -91,6 +87,11 @@ class Overview(ctk.CTkFrame):
         results = self.db.cursor.fetchone()
         return results['COUNT(*)']
     
+    def total_lost(self):
+        self.db.execute_query("SELECT COUNT(*) FROM book_items WHERE status = 'Lost'")
+        results = self.db.cursor.fetchone()
+        return results['COUNT(*)']
+
     def fetch_logs(self, limit=20):
         db = Database()
         query = "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT %s"
@@ -147,7 +148,24 @@ class Overview(ctk.CTkFrame):
 
     def fetch_borrowed(self, limit=20):
         db = Database()
-        query = "SELECT * FROM transactions WHERE status = 'Borrowed' ORDER BY timestamp DESC LIMIT %s"
+        query = """
+        SELECT 
+            t.rfid,
+            t.user_name,
+            t.user_email,
+            t.borrowed_date,
+            t.due_date,
+            t.return_date,
+            t.status,
+            t.overdue_notified,
+            b.book_title,
+            bi.rfid
+        FROM transactions t
+        JOIN book_items bi ON bi.rfid = t.rfid
+        JOIN books b ON b.book_id = bi.book_id
+        WHERE t.status = 'Borrowed' ORDER BY borrowed_date DESC LIMIT %s
+"""
+        
         return db.fetch_all(query, (limit, ))
         
 
@@ -158,8 +176,6 @@ class Overview(ctk.CTkFrame):
         for entry in books:
             card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1)
             card.pack(fill="x", padx=10, pady=5)
-
-            book = db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (entry["book_id"], ))
 
             due_date = entry["due_date"]  
             now = datetime.now()
@@ -173,9 +189,10 @@ class Overview(ctk.CTkFrame):
             action_label = ctk.CTkLabel(card, text=f"Due in {hours} hours", text_color=color, font=("Arial", 15, "bold"))
             action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
 
-            book_info = f"{book['book_title']} (ID: {entry['book_id']})"
+            book_info = f"{entry['book_title']} (ID: {entry['rfid']})"
             ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
 
             borrower = entry["user_name"]
             footer = f"By: {borrower}"
             ctk.CTkLabel(card, text=footer, font=("Arial", 11, "italic")).grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")
+

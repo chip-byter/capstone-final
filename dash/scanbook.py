@@ -68,19 +68,19 @@ class ScanBookFrame(ctk.CTkFrame):
                 self.start_rfid_listener()
                 return
 
-            book_id = book["book_id"]
+            rfid = book["rfid"]
             book_title = book["book_title"] 
             self.label_heading.configure(text="Successful!")
             self.label_subheading.configure(text=f"Scanned RFID: {rfid_tag}\nBook Title: {book_title}")
 
-            self.process_transaction(book_id, book_title)
+            self.process_transaction(rfid, book_title)
             self.winfo_toplevel().unbind_all("<Key>")
 
         except Exception as e:
             self.display_error(str(e))
             self.start_rfid_listener()
 
-    def process_transaction(self, book_id, book_title):
+    def process_transaction(self, rfid, book_title):
         if not self.user:
             self.display_error("User not set.")
             return
@@ -89,24 +89,22 @@ class ScanBookFrame(ctk.CTkFrame):
         user_name = self.user['name']
         user_email = self.user['email']
 
-        status = self.db.get_book_status(book_id, user_id)
+        status = self.db.get_book_status(rfid, user_id)
+
         if status is None:
             self.display_error("Failed to retrieve book status.")
             self.start_rfid_listener()
             return
 
         if status in ["Borrowed", "Overdue"]:
-            self.return_book_flow(user_id, book_id, book_title, user_name, user_email)
+            self.return_book_flow(user_id, rfid, book_title, user_name, user_email)
         else:
-            self.borrow_book_flow(user_id, book_id, book_title, user_name, user_email)
+            self.borrow_book_flow(user_id, rfid, book_title, user_name, user_email)
 
-    def return_book_flow(self, user_id, book_id, book_title, user_name, user_email):
-        self.db.return_book(user_id, book_id)
-        
-        try:
-            self.db.log_activity("Return", book_id, book_title, user_id, user_name)
-        except Exception as e:
-            print(f"[ LOG RETURN ERROR ] : {e}")
+    def return_book_flow(self, user_id, rfid, book_title, user_name, user_email):
+
+        self.db.return_book(user_id, rfid)
+        self.db.log_activity("Returned", rfid, user_id, user_name)
 
         title="Returning"
         message = f"{user_name} returned book {book_title}"
@@ -118,17 +116,17 @@ class ScanBookFrame(ctk.CTkFrame):
         
         self.show_confirmation(title, message)
 
-    def borrow_book_flow(self, user_id, book_id, book_title, user_name, user_email):
-        due_date = self.db.borrow_book(user_id, user_name, user_email, book_id)
+    def borrow_book_flow(self, user_id, rfid, book_title, user_name, user_email):
+        # SPECIFY TIME FOR DUE DATE
+        due_date = self.db.borrow_book(user_id, user_name, user_email, rfid, due_hours=8)
         if not due_date:
             self.display_error("Failed to borrow the book.")
             self.start_rfid_listener()
             return
-        try:
-            self.db.log_activity("Borrowed", book_id, book_title, user_id, user_name)
-        except Exception as e:
-            print(f"[ LOG BORROW ERROR ] : {e}")
         
+        print(f"[BORROW] Borrow successful. Logging activity...")
+        self.db.log_activity("Borrowed", rfid, user_id, user_name)
+                
         formatted_due = due_date.strftime("%B %d, %Y")
         title = "Lending"
         message = f"{user_name} borrowed the book \n{book_title}"

@@ -72,26 +72,20 @@ class Transactions(ctk.CTkFrame):
     def handle_overdue_books():
         db = Database()
 
-        query = """
-        SELECT * FROM transactions
-        WHERE status = 'Overdue' AND overdue_notified = FALSE;
-        """
-
-        overdues = db.fetch_all(query)
+        overdues = db.get_overdue_books()
 
         for book in overdues:
             
-            book_id = book["book_id"]
-            title = db.fetch_one("SELECT book_title FROM books WHERE book_id = %s", (book_id, ))
-            book_title = title["book_title"]
+            rfid = book["rfid"]
+            book_title = book["book_title"]
             user_name = book["user_name"]
             user_email = book["user_email"]
             formatted_due = book["due_date"].strftime("%B %d, %Y")
 
-            db.log_activity("Overdue", book_id, book_title)
+            db.log_activity("Overdue", rfid, book_title)
 
             subject = f"Overdue Book: {book_title}"
-            body_text = f"Hello {user_name},\n\n his is a reminder that the following book you've borrowed <b>'{book_title}'</b> on <b>{formatted_due}<b> is overdue. \n\n Please return it as soon as possible to avoid penalties."
+            body_text = f"Hello {user_name}, \n This is a reminder that the following book you've borrowed <b>'{book_title}'</b> on <b>{formatted_due}<b> is overdue. \n\n Please return it as soon as possible to avoid penalties."
 
             body_html = core.emailsys.generate_email_template(user_name, book_title, body_text)
             core.emailsys.send_notification_email(user_email, subject, body_text, body_html)

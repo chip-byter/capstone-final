@@ -96,6 +96,6 @@ class Inventory(ctk.CTkFrame):
         self.book_grid.destroy()
 
         books = self.get_books(self.current_query)
-        self.book_grid = BookGrid(self, books=books, on_card_click=self.on_book_click)
+        self.book_grid = BookGrid(self.results_area, books=books, on_card_click=self.on_book_click)
         self.book_grid.grid(row=0, column=0, pady=10, sticky="nsew")
-        self.update_idletasks()    
+        # self.update_idletasks()    

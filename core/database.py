@@ -16,20 +16,8 @@ class Database:
         self.cursor.execute(query, params)
         print("Successful Query!")
         return self.cursor.lastrowid
-     
-        # finally:
-        #     if self is not None and self.con.is_connected():
-        #         self.cursor.close()
-        #         self.con.close()
-        #         print("Database is closed!")
 
     def fetch_one(self, query:str, params=None):
-        """ RETURNS ONE RESULT FROM THE QUERY
-
-            ---
-            - query: `SELECT * FROM table WHERE column = %s`
-            - params: `(value, )`
-        """
         try:
             self.cursor.execute(query, params)
             print("Successful Query!")
@@ -78,51 +66,86 @@ class Database:
     
     def get_book_by_rfid(self, rfid):
         rfid = ''.join(rfid.split())
-        self.cursor.execute("SELECT book_id, book_title FROM books WHERE rfid = %s", (rfid,))
+        query = """
+        SELECT
+            bi.book_id,
+            bi.rfid,
+            b.book_title
+        FROM book_items bi
+        JOIN books b ON b.book_id = bi.book_id
+        WHERE bi.rfid = %s 
+        """
+        self.cursor.execute(query, (rfid,))
         return self.cursor.fetchone()
+    
+    def get_overdue_books(self):
+        query = """
+        SELECT 
+            t.rfid,
+            t.user_name,
+            t.user_email,
+            t.borrowed_date,
+            t.due_date,
+            t.return_date,
+            t.status,
+            t.overdue_notified,
+            b.book_title,
+            bi.rfid
+        FROM transactions t
+        JOIN book_items bi ON bi.rfid = t.rfid
+        JOIN books b ON b.book_id = bi.book_id
+        WHERE t.status = 'Overdue' AND t.overdue_notified = FALSE;
+        """
 
-    def get_book_status(self, book_id, user_id):
+        return self.fetch_all(query)
+
+    def get_book_status(self, rfid, user_id):
         query = """
             SELECT status FROM transactions
-            WHERE book_id = %s AND user_id = %s
-            ORDER BY timestamp DESC LIMIT 1
+            WHERE rfid = %s AND user_id = %s
+            ORDER BY borrowed_date DESC LIMIT 1
         """
-        values =  (book_id, user_id)
-        # self.cursor.execute("""
-        #     SELECT status FROM transactions
-        #     WHERE book_id = %s AND user_id = %s
-        #     ORDER BY timestamp DESC LIMIT 1
-        # """, (book_id, user_id))
-        # result = self.cursor.fetchone()
+        values =  (rfid, user_id)
+
         result = self.fetch_one(query, values)
         return result["status"] if result else "Available"
     
-    def borrow_book(self, user_id, user_name, user_email, book_id):
-        due_date = datetime.now() + timedelta(hours=8)
+    def borrow_book(self, user_id, user_name, user_email, rfid, due_hours:int=None, due_days:int=None):
+        self.cursor.execute("SELECT * FROM book_items WHERE rfid = %s", (rfid,))
+        if not self.cursor.fetchone():
+            print(f"[ERROR] RFID {rfid} does not exist in book_items.")
+            return None
+        
+        delta = timedelta()
+        if due_days:
+            delta += timedelta(days=due_days)
+        if due_hours:
+            delta += timedelta(hours=due_hours)
+        due_date = datetime.now() + delta if delta else None
+
         try:
             self.cursor.execute("""
-                INSERT INTO transactions (user_id, user_name, user_email, book_id, status, timestamp, due_date)
+                INSERT INTO transactions (user_id, user_name, user_email, rfid, status, borrowed_date, due_date)
                 VALUES (%s, %s, %s, %s, 'Borrowed', NOW(), %s)
-            """, (user_id, user_name, user_email, book_id, due_date))
-            self.cursor.execute("UPDATE books SET copy = copy - 1 WHERE book_id = %s", (book_id,))
-            self.cursor.execute("UPDATE books SET status = 'Unavailable' WHERE book_id = %s AND copy <= 0", (book_id,))
+            """, (user_id, user_name, user_email, rfid, due_date))
+
+            self.cursor.execute("UPDATE book_items SET status = 'Borrowed' WHERE rfid = %s", (rfid,))
             self.connection.commit()
         except Error as e:
             self.connection.rollback()  
             print(f"Borrow Book Error: {e}")
         return due_date
 
-    def return_book(self, user_id, book_id):
+    def return_book(self, user_id, rfid):
         try:
             self.cursor.execute("""
                 UPDATE transactions 
                 SET status = 'Returned', return_date = NOW()
-                WHERE user_id = %s AND book_id = %s 
+                WHERE user_id = %s AND rfid = %s 
                 AND status IN ('Borrowed', 'Overdue');
-            """, (user_id, book_id))
+            """, (user_id, rfid))
 
-            self.cursor.execute("UPDATE books SET copy = copy + 1 WHERE book_id = %s", (book_id,))
-            self.cursor.execute("UPDATE books SET status = 'Available' WHERE book_id = %s AND copy > 0", (book_id,))
+            self.cursor.execute("UPDATE book_items SET status = 'Available' WHERE rfid = %s", (rfid,))
             self.connection.commit()
         except Error as e:
             self.connection.rollback()  
@@ -163,19 +186,4 @@ if __name__ == "__main__":
     # title = "1984"
     # book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
     # print(book_id["book_id"])
-    query = "old"
-    qs = "SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s"
-    param = (f"%{query}%", f"%{query}%")
-    result = db.fetch_all(qs, param)
-    books = {}
-    for book in result:
-        book_id = book['book_id']
-        new_query = "SELECT item_id, rfid, status FROM book_items WHERE book_id = %s"
-        rfid_and_status = db.fetch_one(new_query, (book_id, ))
-        if rfid_and_status:
-            books = {**book, **rfid_and_status}
-        else:
-            books = book
-
-    print()
-   
+    print(db.get_overdue_books())

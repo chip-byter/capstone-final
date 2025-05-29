@@ -14,7 +14,7 @@ DO   UPDATE transactions
 SET status = 'Overdue', overdue_notified = 1
 WHERE due_date < CURRENT_TIMESTAMP()
 AND status = 'Borrowed'
-p
+
 
 CREATE TABLE books (
     book_id INT AUTO_INCREMENT PRIMARY KEY,

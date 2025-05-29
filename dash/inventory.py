@@ -102,34 +102,11 @@ class Inventory(ctk.CTkFrame):
     def get_books(self, query=''):
         db = Database()
         if query:
-            q = """
-            SELECT 
-                books.book_id,
-                books.book_title,
-                books.book_author,
-                books.cover,
-                book_items.item_id,
-                book_items.rfid,
-                book_items.status
-            FROM books
-            INNER JOIN book_items ON books.book_id = book_items.book_id
-            WHERE books.book_title LIKE %s OR books.book_author LIKE %s
-            """
-            return db.fetch_all(q, (f"%{query}%", f"%{query}%"))
+            q, params = db.get_books(query)
+            return db.fetch_all(q, params)
         else:
-            q = """
-            SELECT 
-                books.book_id,
-                books.book_title,
-                books.book_author,
-                books.cover,
-                book_items.item_id,
-                book_items.rfid,
-                book_items.status
-            FROM books
-            INNER JOIN book_items ON books.book_id = book_items.book_id
-            """
-            return db.fetch_all(q)
+            q = db.get_books()
+            return db.fetch_all(q) 
 
     def on_book_click(self, book_data):
         BookDetailsWindow(self, book_data, on_update=self.refresh_books)

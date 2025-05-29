@@ -55,6 +55,27 @@ class Database:
         except Exception as e:
             print(f"[LOG ERROR]: {e}")
 
+    def get_books(self, query=None):
+        q = """
+            SELECT 
+                books.book_id,
+                books.book_title,
+                books.book_author,
+                books.cover,
+                book_items.item_id,
+                book_items.rfid,
+                book_items.status
+            FROM books
+            INNER JOIN book_items ON books.book_id = book_items.book_id
+            """
+
+        if query:
+            q += " WHERE books.book_title LIKE %s OR books.book_author LIKE %s"
+            params = (f"%{query}%", f"%{query}%")
+            return q, params
+        
+        return q
+    
     def get_book_by_rfid(self, rfid):
         rfid = ''.join(rfid.split())
         self.cursor.execute("SELECT book_id, book_title FROM books WHERE rfid = %s", (rfid,))
@@ -157,5 +178,5 @@ if __name__ == "__main__":
         else:
             books = book
 
-    print(books)
+    print()
    

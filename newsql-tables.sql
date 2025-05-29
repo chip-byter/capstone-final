@@ -55,9 +55,9 @@ SET Global event_scheduler = ON
 CREATE EVENT IF NOT EXISTS overdue_books 
 ON SCHEDULE EVERY 1 MINUTE  
 DO UPDATE transactions   
-SET status = 'Overdue'
+SET status = 'Overdue', overdue_notified = TRUE
 WHERE due_date < CURRENT_TIMESTAMP()
 AND status = 'Borrowed'
-AND overdue_notified = TRUE
+
 
 

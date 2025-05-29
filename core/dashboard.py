@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from core.widgets import ConfirmationDialog
 from core.navigate import NavigationController
 from core.urls import register_routes
 
@@ -53,13 +54,6 @@ class Dashboard(ctk.CTkFrame):
             command=lambda: self.switch("transactions_page", self.transactions_btn))
         self.transactions_btn.grid(row=0, column=1, sticky="ew")
 
-        # self.activity_btn = ctk.CTkButton(
-        #     self.buttons_container, 
-        #     text="Activity Log", 
-        #     fg_color="transparent",
-        #     command=lambda: self.switch("activity_page", self.activity_btn))
-        # self.activity_btn.grid(row=0, column=3, sticky="ew")
-
         self.reports_btn = ctk.CTkButton(
             self.buttons_container, 
             text="Reports", 
@@ -67,9 +61,6 @@ class Dashboard(ctk.CTkFrame):
             fg_color="transparent",
             command=lambda: self.switch("reports_page", self.reports_btn))
         self.reports_btn.grid(row=0, column=3, sticky="ew")
-
-        # self.navigator.navigate_to("overview_page")
-        # self.overview_btn.configure(fg_color="#1F6AA5")
 
         self.logout_btn = ctk.CTkButton(
             self.buttons_container,
@@ -91,7 +82,8 @@ class Dashboard(ctk.CTkFrame):
         self.navigator.navigate_to(page_name)
 
     def logout(self):
-        self.navigation.show_login()
+        ConfirmationDialog(self, "Do you want to logout of your account?", self.navigation.show_login)
+        
 
 
 if __name__ == "__main__":

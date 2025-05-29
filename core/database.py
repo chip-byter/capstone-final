@@ -47,6 +47,7 @@ class Database:
     
     
     def log_activity(self, action, rfid, user_id=None, user_name=None):
+        print(f"[LOG DEBUG] action={action}, rfid={rfid}, user_id={user_id}, user_name={user_name}")
         try:
             self.execute_query("INSERT INTO activity_log (action, rfid, user_id, user_name) VALUES (%s, %s, %s, %s)",
                                (action, rfid, user_id, user_name))

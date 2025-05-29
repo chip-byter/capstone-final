@@ -30,22 +30,34 @@ class ResultsFrame(ctk.CTkFrame):
         self.searchbar.search_field.insert(0, query)
 
         db = Database()
-        # books = {}
-        # books = db.fetch_all("SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s",
-        #                      (f"%{query}%", f"%{query}%"))
+        q = """
+        SELECT 
+            books.book_id,
+            books.book_title,
+            books.book_author,
+            books.cover,
+            book_items.item_id,
+            book_items.rfid,
+            book_items.status
+        FROM books
+        INNER JOIN book_items ON books.book_id = book_items.book_id
+        """
+        all_books = db.fetch_all(q)
 
         qs = "SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s"
         param = (f"%{query}%", f"%{query}%")
-        result = db.fetch_all(qs, param)
-        booksfinal = {}
-        for book in result:
-            book_id = book['book_id']
-            new_query = "SELECT item_id, rfid, status FROM book_items WHERE book_id = %s"
-            rfid_and_status = db.fetch_one(new_query, (book_id, ))
-            if rfid_and_status:
-                booksfinal = {**book, **rfid_and_status}
-            else:
-                booksfinal = book
+        all_books = db.fetch_all(qs, param)
+
+        # booksfinal = {}
+        
+        # for book in result:
+        #     book_id = book['book_id']
+        #     new_query = "SELECT rfid, status FROM book_items WHERE book_id = %s"
+        #     rfid_and_status = db.fetch_one(new_query, (book_id, ))
+        #     if rfid_and_status:
+        #         booksfinal = {**book, **rfid_and_status}
+        #     else:
+        #         booksfinal = book
 
             # books = {**book, **rfid_and_status}
 
@@ -54,7 +66,7 @@ class ResultsFrame(ctk.CTkFrame):
         for widget in self.results_area.winfo_children():
             widget.destroy()
 
-        if not booksfinal:
+        if not all_books:
             self.msg_container = ctk.CTkFrame(self, fg_color="transparent")
             self.msg_container.grid(row=1, column=0, pady=10)
             self.no_result_label = ctk.CTkLabel(
@@ -72,7 +84,7 @@ class ResultsFrame(ctk.CTkFrame):
                 self.no_result_label.destroy()
                 self.no_result_sublabel.destroy()
 
-            book_grid = BookGrid(self.results_area, books=booksfinal, on_card_click=self.show_book_details)
+            book_grid = BookGrid(self.results_area, books=all_books, on_card_click=self.show_book_details)
             book_grid.pack(fill="both", expand=True)
 
     def show_book_details(self, book_data):

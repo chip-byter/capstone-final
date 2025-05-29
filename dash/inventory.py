@@ -8,6 +8,7 @@ from core.encryption import verify_user
 class Inventory(ctk.CTkFrame):
     def __init__(self, parent, controller, fg_color=None):
         super().__init__(parent, fg_color="transparent")
+        self.current_query = ""
         self.navigation = controller
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -32,12 +33,38 @@ class Inventory(ctk.CTkFrame):
         BookForm(self, on_update=self.refresh_books)
 
     def load_and_display_books(self, query=None):
+        
         db = Database()
         # all_books = fetch_all_books()
-        all_books = db.fetch_all("SELECT * FROM books")
+        q = """
+        SELECT 
+            books.book_id,
+            books.book_title,
+            books.book_author,
+            books.cover,
+            book_items.item_id,
+            book_items.rfid,
+            book_items.status
+        FROM books
+        INNER JOIN book_items ON books.book_id = book_items.book_id
+        """
+        all_books = db.fetch_all(q)
 
         if query:
-            all_books = db.fetch_all("SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s", (f"%{query}%", f"%{query}%"))
+            q = """
+            SELECT 
+                books.book_id,
+                books.book_title,
+                books.book_author,
+                books.cover,
+                book_items.item_id,
+                book_items.rfid,
+                book_items.status
+            FROM books
+            INNER JOIN book_items ON books.book_id = book_items.book_id
+            WHERE books.book_title LIKE %s OR books.book_author LIKE %s
+            """
+            all_books = db.fetch_all(q, (f"%{query}%", f"%{query}%"))
         
         for widget in self.results_area.winfo_children():
             widget.destroy()
@@ -66,13 +93,43 @@ class Inventory(ctk.CTkFrame):
 
             self.book_grid = BookGrid(self.results_area, books=all_books, on_card_click=self.on_book_click)
             self.book_grid.pack(fill="both", expand=True)
+            self.results_area.update_idletasks()
 
     def search_books(self, query):
+        self.current_query = query
         self.load_and_display_books(query)
 
-    def get_books(self):
+    def get_books(self, query=''):
         db = Database()
-        return db.fetch_all("SELECT * FROM books")
+        if query:
+            q = """
+            SELECT 
+                books.book_id,
+                books.book_title,
+                books.book_author,
+                books.cover,
+                book_items.item_id,
+                book_items.rfid,
+                book_items.status
+            FROM books
+            INNER JOIN book_items ON books.book_id = book_items.book_id
+            WHERE books.book_title LIKE %s OR books.book_author LIKE %s
+            """
+            return db.fetch_all(q, (f"%{query}%", f"%{query}%"))
+        else:
+            q = """
+            SELECT 
+                books.book_id,
+                books.book_title,
+                books.book_author,
+                books.cover,
+                book_items.item_id,
+                book_items.rfid,
+                book_items.status
+            FROM books
+            INNER JOIN book_items ON books.book_id = book_items.book_id
+            """
+            return db.fetch_all(q)
 
     def on_book_click(self, book_data):
         BookDetailsWindow(self, book_data, on_update=self.refresh_books)
@@ -82,5 +139,7 @@ class Inventory(ctk.CTkFrame):
             widget.destroy()
         self.book_grid.destroy()
 
-        self.book_grid = BookGrid(self, books=self.get_books(), on_card_click=self.on_book_click)
+        books = self.get_books(self.current_query)
+        self.book_grid = BookGrid(self, books=books, on_card_click=self.on_book_click)
         self.book_grid.grid(row=1, column=0, pady=10, sticky="nsew")
+        self.update_idletasks()    

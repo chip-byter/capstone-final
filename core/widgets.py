@@ -48,7 +48,6 @@ class BookCard(ctk.CTkFrame):
         
         book_title = book_data['book_title']
         book_author = book_data['book_author']
-        book_item_id = book_data.get('item_id', 'NULL')
         book_status = book_data.get('status', 'UNKOWN')
         book_cover = book_data['cover']
         # self.grid_columnconfigure(0, weight=1)
@@ -78,7 +77,7 @@ class BookCard(ctk.CTkFrame):
         self.book_author = ctk.CTkLabel(self.book_metadata, text=self.text_author, font=("Helvetica", 12, 'italic'), wraplength=120)
         self.book_author.grid(row=1, column=0)
 
-        self.status = ctk.CTkLabel(self, text=f"Status: {book_status} [ {book_item_id} ]", bg_color="transparent", font=("helvetica", 12, "bold"), corner_radius=10)
+        self.status = ctk.CTkLabel(self, text=f"{book_status}", bg_color="transparent", font=("helvetica", 12, "bold"), corner_radius=10)
         self.status.grid(row=0, column=0, padx=5, pady=(5,0), sticky="ew")
 
         self.bind_all_widgets("<Button-1>", lambda e: on_click(book_data) if on_click else None)
@@ -141,6 +140,7 @@ class ConfirmationDialog(ctk.CTkToplevel):
         self.title("Confirmation")
         center_window(self, 300, 150)
         # self.grab_set()
+        self.focus_force() 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=0)

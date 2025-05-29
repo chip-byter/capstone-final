@@ -11,7 +11,7 @@ class BookForm(ctk.CTkToplevel):
         self.title("Update Book Details")
         center_window(self, 450, 400)
         self.resizable(False, False)
-        self.focus()
+        self.focus_force()   
         self.grab_set()
         self.on_update = on_update
 
@@ -37,45 +37,40 @@ class BookForm(ctk.CTkToplevel):
         self.rfid_entry = self.create_labeled_entry("RFID: ", 2, "RFID")
         self.book_title_entry = self.create_labeled_entry("Book Title: ", 3, "Book Title")
         self.author_entry = self.create_labeled_entry("Author: ", 4, "Book Author")
-        self.status_entry = self.create_labeled_entry("Status: ", 7, "'Available', 'Lost', 'Damaged', 'Borrowed'")
-        self.cover_entry = self.create_labeled_entry("Cover Path: ", 9, "assets/book_covers/title-of-the-book.jpeg")
+        self.status_entry = self.create_labeled_entry("Status: ", 5, "'Available', 'Lost', 'Damaged', 'Borrowed'")
+        self.cover_entry = self.create_labeled_entry("Cover Path: ", 6, "assets/book_covers/title-of-the-book.jpeg")
         
         self.buttons = ctk.CTkFrame(self, fg_color="transparent")
-        self.buttons.grid(row=8, column=0, sticky="ne")
+        self.buttons.grid(row=1, column=0, sticky="ne")
 
-        self.button_name = ""
-        if self.book_data:
-            self.button_name = "Update"
-        else:
-            self.button_name = "Add"
+        button_name = "Update" if self.book_data else "Add"
 
-        self.action_btn = ctk.CTkButton(self.buttons, text=self.button_name, width=100, command=self.confirm_send)
+        self.action_btn = ctk.CTkButton(self.buttons, text=button_name, width=100, command=lambda: self.confirm_send(button_name))
         self.action_btn.grid(row=0, column=1, padx=5, pady=10)
         
-        self.cancel_btn = ctk.CTkButton(self.buttons, text="Cancel", width=100)
+        self.cancel_btn = ctk.CTkButton(self.buttons, text="Cancel", width=100, command=self.cancel)
         self.cancel_btn.grid(row=0, column=0, padx=5, pady=10)
 
         if self.book_data:
             self.set_book_data()
 
-        # self.after(100, self.set_grab)
+        self.after(100, self.set_grab)
 
     def create_labeled_entry(self, label, row, placeholder):
-        ctk.CTkLabel(self.frame, text=label).grid(row=row, column=0, sticky="e", padx=10, pady=5)
+        ctk.CTkLabel(self.frame, text=label).grid(row=row, column=0, sticky="e", padx=(15,5), pady=5)
         entry = ctk.CTkEntry(self.frame, placeholder_text=placeholder, width=300)
-        entry.grid(row=row, column=1, sticky="e", padx=10, pady=5)
+        entry.grid(row=row, column=1, sticky="ew", padx=(5, 15), pady=5)
         return entry
 
-    # def set_grab(self):
-    #     self.grab_set()
+    def set_grab(self):
+        self.grab_set()
 
-    def confirm_send(self):
-        ConfirmationDialog(self, 
-                           f"Are you sure you want to add '{self.book_title_entry.get().strip()}'?", 
-                           self.insert_new_book)
+    def confirm_send(self, action):
+        book_title = self.book_title_entry.get().strip()
+        ConfirmationDialog(self, f"Are you sure you want to {action} '{book_title}'?", self.send_data)
 
     def get_book_data(self):
-        book_data = {
+        return {
             "id": self.book_id_entry.get().strip(),
             "rfid": self.rfid_entry.get().strip(),
             "title": self.book_title_entry.get().strip(),
@@ -83,9 +78,9 @@ class BookForm(ctk.CTkToplevel):
             "cover": self.db.generate_path(self.book_title_entry.get().strip()),
             "status": self.status_entry.get().strip(),
         }
-        return book_data
 
-    def insert_new_book(self):
+
+    def send_data(self):
         book = self.get_book_data()
         book_id = book["id"]
         book_rfid = book["rfid"]
@@ -94,38 +89,56 @@ class BookForm(ctk.CTkToplevel):
         book_cover = book["cover"]
         book_status = book["status"]
 
-
         try:
-            query_book = """
-            INSERT INTO books (book_id, book_title, book_author, cover) 
-            VALUES (%s, %s, %s, %s)        
-            """
-            metadata = (book_id, book_title, book_author, book_cover)
-            # Insert book metadata in books table
-            self.db.execute_query(query_book, metadata)
-            self.db.connection.commit()
+            if self.book_data:
+                # === UPDATE MODE ===
+                query_book = """
+                UPDATE books 
+                SET book_title = %s, book_author = %s, cover = %s 
+                WHERE book_id = %s
+                """
+                metadata = (book_title, book_author, book_cover, book_id)
+                self.db.execute_query(query_book, metadata)
 
-            # book = self.db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (book_data["title"], ))
-            print(f"Book {book_title} added successfully.")
+                query_item = """
+                UPDATE book_items 
+                SET rfid = %s, status = %s 
+                WHERE book_id = %s
+                """
+                item_data = (book_rfid, book_status, book_id)
+                self.db.execute_query(query_item, item_data)
+
+                self.db.connection.commit()
+                self.db.log_activity("Updated", book_rfid, user_name="Admin")
+                print(f"Book '{book_title}' updated successfully.")
+
+            else:
+                # === ADD MODE ===
+                query_book = """
+                INSERT INTO books (book_id, book_title, book_author, cover) 
+                VALUES (%s, %s, %s, %s)
+                """
+                metadata = (book_id, book_title, book_author, book_cover)
+                self.db.execute_query(query_book, metadata)
+
+                query_item = """
+                INSERT INTO book_items (book_id, rfid, status)
+                VALUES (%s, %s, %s)
+                """
+                item_data = (book_id, book_rfid, book_status)
+                self.db.execute_query(query_item, item_data)
+
+                self.db.connection.commit()
+                self.db.log_activity("Added", book_rfid, user_name="Admin")
+                print(f"Book '{book_title}' added successfully.")
 
         except Exception as e:
-            print("Insert in books table failed :", e)
+            print("Database operation failed:", e)
 
-        try:
-            query_item = """
-            INSERT INTO book_items (book_id, rfid, status)
-            VALUES (%s, %s, %s)
-            """
-            book_item = (book_id, book_rfid, book_status)
+        if self.on_update:
+            self.on_update()
+        self.destroy()
 
-            # Insert individual book item in book_items table
-            self.db.execute_query(query_item, book_item)
-            self.db.connection.commit()
-            self.db.log_activity("ADDED", book_rfid, user_name="Admin")
-            print(f"Copy of the book '{book_title}' added successfully")
-        except Exception as e:
-            print("Insert in book_items table failed :", e)
-            
     def set_book_data(self):
         self.book_id_entry.insert(0, self.book_data.get("book_id", ""))
         self.rfid_entry.insert(0, self.book_data.get("rfid", ""))
@@ -134,14 +147,9 @@ class BookForm(ctk.CTkToplevel):
         self.status_entry.insert(0, self.book_data.get("status", ""))
         self.cover_entry.insert(0, self.book_data.get("cover", ""))
 
-    #     if self.on_update:
-    #         self.on_update()  
-    #     else:
-    #         print("Book data:", book_data)
-
         
-    #     self.destroy()
-
+    def cancel(self):
+        ConfirmationDialog(self, "Do you want to close this form?", self.destroy)
 
 if __name__ == "__main__":
     root = ctk.CTk()

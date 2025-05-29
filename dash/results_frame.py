@@ -30,41 +30,14 @@ class ResultsFrame(ctk.CTkFrame):
         self.searchbar.search_field.insert(0, query)
 
         db = Database()
-        q = """
-        SELECT 
-            books.book_id,
-            books.book_title,
-            books.book_author,
-            books.cover,
-            book_items.item_id,
-            book_items.rfid,
-            book_items.status
-        FROM books
-        INNER JOIN book_items ON books.book_id = book_items.book_id
-        """
-        all_books = db.fetch_all(q)
+        qs, params = db.get_books(query)
+        all_books = db.fetch_all(qs, params)
 
-        qs = "SELECT * FROM books WHERE book_title LIKE %s OR book_author LIKE %s"
-        param = (f"%{query}%", f"%{query}%")
-        all_books = db.fetch_all(qs, param)
-
-        # booksfinal = {}
-        
-        # for book in result:
-        #     book_id = book['book_id']
-        #     new_query = "SELECT rfid, status FROM book_items WHERE book_id = %s"
-        #     rfid_and_status = db.fetch_one(new_query, (book_id, ))
-        #     if rfid_and_status:
-        #         booksfinal = {**book, **rfid_and_status}
-        #     else:
-        #         booksfinal = book
-
-            # books = {**book, **rfid_and_status}
-
-
-        # Clear previous results
+   
         for widget in self.results_area.winfo_children():
             widget.destroy()
+       
+          
 
         if not all_books:
             self.msg_container = ctk.CTkFrame(self, fg_color="transparent")
@@ -81,8 +54,12 @@ class ResultsFrame(ctk.CTkFrame):
             self.no_result_sublabel.grid(row=1, column=0, sticky="new")
         else:
             if hasattr(self, "msg_container"):
+                self.msg_container.destroy()
                 self.no_result_label.destroy()
                 self.no_result_sublabel.destroy()
+            
+            if hasattr(self, "book_grid"):
+                self.book_grid.destroy()
 
             book_grid = BookGrid(self.results_area, books=all_books, on_card_click=self.show_book_details)
             book_grid.pack(fill="both", expand=True)

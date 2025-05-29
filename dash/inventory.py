@@ -26,7 +26,8 @@ class Inventory(ctk.CTkFrame):
 
         self.results_area = ctk.CTkFrame(self, fg_color="transparent")
         self.results_area.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
-        
+        self.results_area.grid_columnconfigure(0, weight=1)
+        self.results_area.grid_rowconfigure(0, weight=1)
         self.load_and_display_books()
 
     def open_book_form(self):
@@ -36,35 +37,12 @@ class Inventory(ctk.CTkFrame):
         
         db = Database()
         # all_books = fetch_all_books()
-        q = """
-        SELECT 
-            books.book_id,
-            books.book_title,
-            books.book_author,
-            books.cover,
-            book_items.item_id,
-            book_items.rfid,
-            book_items.status
-        FROM books
-        INNER JOIN book_items ON books.book_id = book_items.book_id
-        """
+        q = db.get_books()
         all_books = db.fetch_all(q)
 
         if query:
-            q = """
-            SELECT 
-                books.book_id,
-                books.book_title,
-                books.book_author,
-                books.cover,
-                book_items.item_id,
-                book_items.rfid,
-                book_items.status
-            FROM books
-            INNER JOIN book_items ON books.book_id = book_items.book_id
-            WHERE books.book_title LIKE %s OR books.book_author LIKE %s
-            """
-            all_books = db.fetch_all(q, (f"%{query}%", f"%{query}%"))
+            q, params = db.get_books(query)
+            all_books = db.fetch_all(q, params)
         
         for widget in self.results_area.winfo_children():
             widget.destroy()
@@ -85,6 +63,7 @@ class Inventory(ctk.CTkFrame):
             
         else: 
             if hasattr(self, "msg_container"):
+                self.msg_container.destroy()
                 self.no_result_label.destroy()
                 self.no_result_sublabel.destroy()
 
@@ -92,7 +71,7 @@ class Inventory(ctk.CTkFrame):
                 self.book_grid.destroy()
 
             self.book_grid = BookGrid(self.results_area, books=all_books, on_card_click=self.on_book_click)
-            self.book_grid.pack(fill="both", expand=True)
+            self.book_grid.grid(row=0, column=0, pady=10, sticky="nsew")
             self.results_area.update_idletasks()
 
     def search_books(self, query):
@@ -118,5 +97,5 @@ class Inventory(ctk.CTkFrame):
 
         books = self.get_books(self.current_query)
         self.book_grid = BookGrid(self, books=books, on_card_click=self.on_book_click)
-        self.book_grid.grid(row=1, column=0, pady=10, sticky="nsew")
+        self.book_grid.grid(row=0, column=0, pady=10, sticky="nsew")
         self.update_idletasks()    

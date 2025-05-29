@@ -128,8 +128,6 @@ class Reports(ctk.CTkFrame):
         return buffer, filename
      
         
-
-        
     def send_report(self):
         buffer, filename = self.export_as_excel()
         send_excel_report(

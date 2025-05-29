@@ -85,9 +85,9 @@ class Dashboard(ctk.CTkFrame):
     def switch(self, page_name, actv_btn):
         for each_widget in self.buttons_container.winfo_children():
             if isinstance(each_widget, ctk.CTkButton):
-                each_widget.configure(fg_color="transparent")
+                each_widget.configure(fg_color="transparent", text_color="black")
 
-        actv_btn.configure(fg_color="#1F6AA5", text_color="black",)
+        actv_btn.configure(fg_color="#1F6AA5", text_color="white",)
         self.navigator.navigate_to(page_name)
 
     def logout(self):

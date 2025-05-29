@@ -128,7 +128,6 @@ class Database:
             self.connection.rollback()  
             print(f"Return Book Error: {e}")
 
-
     def reset_table(self, table_name:str):
         """ DELETE ALL ROWS OF THE TABLE
 

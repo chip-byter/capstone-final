@@ -8,6 +8,9 @@ from core.emailsys import send_excel_report
 from core.database import Database
 import openpyxl
 
+from core.widgets import ConfirmationDialog, MessageBox
+from dash.report_form import ReportForm
+
 class Reports(ctk.CTkFrame):
     def __init__(self, parent, controller, fg_color=None):
         super().__init__(parent, fg_color="transparent")
@@ -51,10 +54,10 @@ class Reports(ctk.CTkFrame):
         self.export_btns.grid_columnconfigure(1, weight=1)
         self.export_btns.grid_columnconfigure(2, weight=1)
 
-        self.export_excel = ctk.CTkButton(self.export_btns, text="Send Report", width=100, command=self.send_report)
+        self.export_excel = ctk.CTkButton(self.export_btns, text="Send Report", command=self.open_report_form)
         self.export_excel.grid(row=0, column=2, padx=10, sticky="e")
 
-        self.total_label = ctk.CTkLabel(self.export_btns, text="Total : ", width=150, anchor="w", fg_color="gray")
+        self.total_label = ctk.CTkLabel(self.export_btns, text="Total : ", width=150, anchor="w")
         self.total_label.grid(row=0, column=0, padx=10, sticky="w")
 
         self.pagination_frame = ctk.CTkFrame(self.export_btns, fg_color="transparent")
@@ -209,11 +212,12 @@ class Reports(ctk.CTkFrame):
             self.current_page -= 1
             self.populate_treeview()
 
-    def export_as_excel(self):
-        mode = self.report_option.get()
+    def export_as_excel(self, custom_filename=None):
+        report_type = self.report_option.get()
         current_date = datetime.now().strftime("%Y-%m-%d")
-        formatted_type = re.sub(r'\s+', '_', mode.strip().lower())
-        filename = f"report_{formatted_type}_{current_date}.xlsx"
+        formatted_type = re.sub(r'\s+', '_', report_type.strip().lower())
+
+        filename = custom_filename if custom_filename else f"report_{formatted_type}_{current_date}.xlsx"
 
         df = pd.DataFrame(self.report_data, columns=self.columns)
         buffer = BytesIO()
@@ -224,26 +228,34 @@ class Reports(ctk.CTkFrame):
             worksheet = writer.sheets['Report']
             for col in ['A', 'B', 'C', 'D', 'E']:
                 worksheet.column_dimensions[col].width = 30
-            worksheet['A1'] = f"{mode}"
+            worksheet['A1'] = f"{report_type}"
             worksheet['B1'] = f"Report generated on: {current_date}"
 
         buffer.seek(0) 
         return buffer, filename
      
     def open_report_form(self):
-        self.report_form = ctk.CTkToplevel(self)
-        self.report_form.title("Data Report Settings")
+        try:
+            ReportForm(self, self.send_report)
+            MessageBox(self, "Sending Report", "Generated file report sent successfully!")
+        except:
+            MessageBox(self, "Sending Report", "An error has occured. Please try again!")
         
 
 
-    def send_report(self):
-        buffer, filename = self.export_as_excel()
-        send_excel_report(
-            recipient='delacruz.ellezir@gmail.com',
-            subject='Organicer Report',
-            body='Please see the attached file of the automated library report.',
-            file_buffer=buffer,
-            filename=filename
-        )
+    def send_report(self, recipient_email, custom_filename=None):
+        buffer, filename = self.export_as_excel(custom_filename)
+        try:
+            send_excel_report(
+                recipient=recipient_email,
+                subject='Organicer Report',
+                body='Please see the attached file of the automated library report. \n ',
+                file_buffer=buffer,
+                filename=filename
+            )
+            MessageBox(self, "Sending Report", "Generated file report sent successfully!")
+        except:
+            MessageBox(self, "Sending Report", "An error has occured. Please try again!")
+        
 
   

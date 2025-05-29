@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from core.dashboard import Dashboard
+from core.widgets import MessageBox
 from core.encryption import verify_user
 
 
@@ -81,6 +81,7 @@ class Login(ctk.CTkFrame):
             print("Access Granted")
             self.navigation.show_dashboard()
         else:
+            MessageBox(self, "Login Failed", "Incorrect username and password. \n Please try again.")
             print("Access Denied")
             
         # if verify_user(username, password):

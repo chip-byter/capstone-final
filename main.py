@@ -10,7 +10,6 @@ class Organicer(ctk.CTk):
     def __init__(self):
         super().__init__()
         
-        
         self.title("Organicer")
         self.geometry("800x400")
         center_window(self, 800, 400)

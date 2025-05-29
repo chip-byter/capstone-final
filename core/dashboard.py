@@ -22,7 +22,7 @@ class Dashboard(ctk.CTkFrame):
         register_routes(self.navigator)
 
         self.buttons_container = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.buttons_container.grid(row=0, column=0, pady=(10, 0), sticky="ew")
+        self.buttons_container.grid(row=0, column=0, pady=(10, 0), padx=10, sticky="ew")
 
         self.buttons_container.grid_columnconfigure(0, weight=1)
         self.buttons_container.grid_columnconfigure(1, weight=1)
@@ -84,7 +84,6 @@ class Dashboard(ctk.CTkFrame):
     def logout(self):
         ConfirmationDialog(self, "Do you want to logout of your account?", self.navigation.show_login)
         
-
 
 if __name__ == "__main__":
     root = ctk.CTk()

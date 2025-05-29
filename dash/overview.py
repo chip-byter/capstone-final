@@ -151,6 +151,7 @@ class Overview(ctk.CTkFrame):
         query = """
         SELECT 
             t.rfid,
+            t.user_id,
             t.user_name,
             t.user_email,
             t.borrowed_date,
@@ -193,6 +194,7 @@ class Overview(ctk.CTkFrame):
             ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
 
             borrower = entry["user_name"]
-            footer = f"By: {borrower}"
+            user_id = entry['user_id']
+            footer = f"By: {borrower} [ {user_id} ]"
             ctk.CTkLabel(card, text=footer, font=("Arial", 11, "italic")).grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")
 

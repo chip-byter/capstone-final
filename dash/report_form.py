@@ -40,22 +40,21 @@ class ReportForm(ctk.CTkToplevel):
     def set_grab(self):
         self.grab_set()
         
-    def get_form_entries(self):
-        return {
-        "recipient_email": self.recipient_email.get(),
-        "filename": self.filename.get(),
-    }
+    
 
     def send(self):
         recipient = self.recipient_email.get().strip()
         filename = self.filename.get().strip() or None
 
-        if not recipient:
-            MessageBox(self, "Export Report Form", "Please enter an email.")
-            return
-
-        self.on_submit(recipient, filename)
+        if self.on_submit:
+            self.on_submit(recipient, filename) 
         self.destroy()
+
+
+    # def submit(self):
+    #     if self.on_submit:
+    #         self.on_submit(self.get_form_entries()) 
+    #     self.destroy()
 
 if __name__ == "__main__":
     root = ctk.CTk()

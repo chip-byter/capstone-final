@@ -9,7 +9,7 @@ class BookDetailsWindow(ctk.CTkToplevel):
         super().__init__(parent)
         
         self.title("Book Details")
-        center_window(self, 450, 400)
+        center_window(self, 450, 350)
         self.resizable(False, False)
         self.focus_force()   
         self.grab_set()
@@ -29,10 +29,9 @@ class BookDetailsWindow(ctk.CTkToplevel):
         # BOOK DETAILS
         self.book_id_entry = self.create_labeled_entry("Book ID: ", 1, "Book ID")
         self.rfid_entry = self.create_labeled_entry("RFID: ", 2, "RFID")
-        self.book_title_entry = self.create_labeled_entry("Book Title: ", 3, "Book Title")
+        self.book_title_entry = self.create_labeled_entry("Title: ", 3, "Book Title")
         self.author_entry = self.create_labeled_entry("Author: ", 4, "Book Author")
         self.status_entry = self.create_labeled_entry("Status: ", 5, "'Available', 'Lost', 'Damaged', 'Borrowed'")
-        self.cover_entry = self.create_labeled_entry("Cover Path: ", 6, "assets/book_covers/title-of-the-book.jpeg")
         
         self.buttons = ctk.CTkFrame(self, fg_color="transparent")
         self.buttons.grid(row=1, column=0, sticky="ne")
@@ -78,7 +77,6 @@ class BookDetailsWindow(ctk.CTkToplevel):
             "rfid": self.book['rfid'],
             "title": self.book['book_title'],
             "author": self.book['book_author'],
-            "cover": self.book['cover'],
             "status": self.book['status'],
         }
         return book
@@ -90,7 +88,6 @@ class BookDetailsWindow(ctk.CTkToplevel):
         self.book_title_entry.configure(text=book['title'])
         self.author_entry.configure(text=book['author'])
         self.status_entry.configure(text=book['status'])
-        self.cover_entry.configure(text=book['cover'])
 
     def delete_book(self):
         db = Database()

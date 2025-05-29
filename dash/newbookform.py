@@ -9,7 +9,7 @@ class BookForm(ctk.CTkToplevel):
         self.db = Database()
        
         self.title("Update Book Details")
-        center_window(self, 450, 400)
+        center_window(self, 450, 350)
         self.resizable(False, False)
         self.focus_force()   
         self.grab_set()
@@ -35,10 +35,9 @@ class BookForm(ctk.CTkToplevel):
         # BOOK DETAILS
         self.book_id_entry = self.create_labeled_entry("Book ID: ", 1, "Book ID")
         self.rfid_entry = self.create_labeled_entry("RFID: ", 2, "RFID")
-        self.book_title_entry = self.create_labeled_entry("Book Title: ", 3, "Book Title")
+        self.book_title_entry = self.create_labeled_entry("Title: ", 3, "Book Title")
         self.author_entry = self.create_labeled_entry("Author: ", 4, "Book Author")
         self.status_entry = self.create_labeled_entry("Status: ", 5, "'Available', 'Lost', 'Damaged', 'Borrowed'")
-        self.cover_entry = self.create_labeled_entry("Cover Path: ", 6, "assets/book_covers/title-of-the-book.jpeg")
         
         self.buttons = ctk.CTkFrame(self, fg_color="transparent")
         self.buttons.grid(row=1, column=0, sticky="ne")
@@ -75,7 +74,6 @@ class BookForm(ctk.CTkToplevel):
             "rfid": self.rfid_entry.get().strip(),
             "title": self.book_title_entry.get().strip(),
             "author": self.author_entry.get().strip(),
-            "cover": self.db.generate_path(self.book_title_entry.get().strip()),
             "status": self.status_entry.get().strip(),
         }
 
@@ -86,7 +84,6 @@ class BookForm(ctk.CTkToplevel):
         book_rfid = book["rfid"]
         book_title = book["title"]
         book_author = book["author"]
-        book_cover = book["cover"]
         book_status = book["status"]
 
         try:
@@ -94,10 +91,10 @@ class BookForm(ctk.CTkToplevel):
                 # === UPDATE MODE ===
                 query_book = """
                 UPDATE books 
-                SET book_title = %s, book_author = %s, cover = %s 
+                SET book_title = %s, book_author = %s,
                 WHERE book_id = %s
                 """
-                metadata = (book_title, book_author, book_cover, book_id)
+                metadata = (book_title, book_author, book_id)
                 self.db.execute_query(query_book, metadata)
 
                 query_item = """
@@ -115,10 +112,10 @@ class BookForm(ctk.CTkToplevel):
             else:
                 # === ADD MODE ===
                 query_book = """
-                INSERT INTO books (book_id, book_title, book_author, cover) 
+                INSERT INTO books (book_id, book_title, book_author) 
                 VALUES (%s, %s, %s, %s)
                 """
-                metadata = (book_id, book_title, book_author, book_cover)
+                metadata = (book_id, book_title, book_author)
                 self.db.execute_query(query_book, metadata)
 
                 query_item = """
@@ -145,7 +142,6 @@ class BookForm(ctk.CTkToplevel):
         self.book_title_entry.insert(0, self.book_data.get("book_title", ""))
         self.author_entry.insert(0, self.book_data.get("book_author", ""))
         self.status_entry.insert(0, self.book_data.get("status", ""))
-        self.cover_entry.insert(0, self.book_data.get("cover", ""))
 
         
     def cancel(self):

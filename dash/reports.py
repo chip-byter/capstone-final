@@ -235,13 +235,7 @@ class Reports(ctk.CTkFrame):
         return buffer, filename
      
     def open_report_form(self):
-        try:
-            ReportForm(self, self.send_report)
-            MessageBox(self, "Sending Report", "Generated file report sent successfully!")
-        except:
-            MessageBox(self, "Sending Report", "An error has occured. Please try again!")
-        
-
+        ReportForm(self, self.send_report)
 
     def send_report(self, recipient_email, custom_filename=None):
         buffer, filename = self.export_as_excel(custom_filename)
@@ -253,9 +247,9 @@ class Reports(ctk.CTkFrame):
                 file_buffer=buffer,
                 filename=filename
             )
-            MessageBox(self, "Sending Report", "Generated file report sent successfully!")
-        except:
-            MessageBox(self, "Sending Report", "An error has occured. Please try again!")
+            MessageBox(self, "Sending Report", "Generated file report sent successfully!, ")
+        except Exception as e:
+            MessageBox(self, "Sending Report", f"An error has occured.\n {e}")
         
 
   

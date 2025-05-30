@@ -8,7 +8,8 @@ class Database:
             host="localhost",
             user="root",
             password="admin123",
-            database="capstone"
+            # database="capstone"
+            database = 'Library'
         )
        self.cursor = self.connection.cursor(dictionary=True)
 

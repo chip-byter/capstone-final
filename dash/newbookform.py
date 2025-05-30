@@ -8,14 +8,21 @@ class BookForm(ctk.CTkToplevel):
         self.parent = parent
         self.db = Database()
        
-        self.title("Update Book Details")
+        self.book_data = book_data or {}
+        self.action = ""
+        if self.book_data:
+            self.action = "Update Book"
+        else:
+            self.action = "Add New Book"
+
+        self.title(self.action)
+
         center_window(self, 450, 350)
         self.resizable(False, False)
         self.focus_force()   
-        self.grab_set()
+        # self.grab_set()
         self.on_update = on_update
 
-        self.book_data = book_data or {}
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -24,11 +31,6 @@ class BookForm(ctk.CTkToplevel):
         self.frame.grid(row=0, column=0, sticky="nsew")
         self.frame.grid_columnconfigure(1, weight=1)
     
-        self.action = ""
-        if self.book_data:
-            self.action = "Update Book"
-        else:
-            self.action = "Add New Book"
 
         ctk.CTkLabel(self.frame, text=self.action, font=("Helvetica", 20, "bold")).grid(row=0, column=0, columnspan=2, pady=20)
 
@@ -112,6 +114,7 @@ class BookForm(ctk.CTkToplevel):
         book_title = book["title"]
         book_author = book["author"]
         book_status = book["status"]
+        book_cover = self.db.generate_path(book_title)
         book_exists = self.db.fetch_one("SELECT 1 FROM books WHERE book_id = %s", (book_id,))
 
         try:
@@ -148,10 +151,10 @@ class BookForm(ctk.CTkToplevel):
             else:
                 # ADD BOOK
                 query_book = """
-                INSERT INTO books (book_id, book_title, book_author) 
+                INSERT INTO books (book_id, book_title, book_author, cover) 
                 VALUES (%s, %s, %s, %s)
                 """
-                metadata = (book_id, book_title, book_author)
+                metadata = (book_id, book_title, book_author, book_cover)
                 self.db.execute_query(query_book, metadata)
 
                 query_item = """

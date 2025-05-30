@@ -96,6 +96,6 @@ class Transactions(ctk.CTkFrame):
 if __name__ == "__main__":
     root = ctk.CTk()
     root.geometry("800x400")
-    loginPage = Transactions(root)
+    loginPage = Transactions(root, root)
     loginPage.pack(expand=True, fill="both")
     root.mainloop()

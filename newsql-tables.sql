@@ -34,7 +34,7 @@ CREATE TABLE `activity_log` (
 
 CREATE TABLE `transactions` (
   `transaction_id` INT NOT NULL AUTO_INCREMENT,
-  `book_id` VARCHAR(20) NOT NULL,
+  `rfid` VARCHAR(20) NOT NULL,
   `user_id` VARCHAR(50) NOT NULL,
   `user_name` VARCHAR(100) DEFAULT NULL,
   `user_email` VARCHAR(100) DEFAULT NULL,
@@ -44,9 +44,10 @@ CREATE TABLE `transactions` (
   `status` ENUM('Borrowed','Returned','Overdue') DEFAULT 'Borrowed',
   `overdue_notified` TINYINT(1) DEFAULT '0',
   PRIMARY KEY (`transaction_id`),
-  KEY `book_id` (`book_id`),
-  FOREIGN KEY (`book_id`) REFERENCES `books` (`book_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `rfid` (`rfid`),
+  FOREIGN KEY (`rfid`) REFERENCES `book_items` (`rfid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) 
+
 
 ----------------------------------  EVENTS  ----------------------------------
 

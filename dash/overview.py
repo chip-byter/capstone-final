@@ -58,6 +58,7 @@ class Overview(ctk.CTkFrame):
         self.show_borrowed()
 
     def create_summary_container(self, title, column, total_number):
+        total_number = total_number if total_number else 0
         self.frame = ctk.CTkFrame(self.summary_frame, border_width=1)
         self.frame.grid(row=0, column=column, padx=10, sticky="nsew")
         self.frame.grid_columnconfigure(0, weight=1)
@@ -68,7 +69,7 @@ class Overview(ctk.CTkFrame):
         ctk.CTkLabel(self.frame, text=title, font=("Helvetica", 13, 'bold')).grid(row=1, column=0, pady=(0, 5), sticky='n')   
 
     def total_bks(self):    
-        self.db.execute_query("SELECT COUNT(*) FROM books")
+        self.db.execute_query("SELECT COUNT(*) FROM book_items")
         results = self.db.cursor.fetchone()
         return results['COUNT(*)']
     
@@ -171,29 +172,29 @@ class Overview(ctk.CTkFrame):
     def show_borrowed(self):
         db = Database()
         books = self.fetch_borrowed()
+        if books:
+            for entry in books:
 
-        for entry in books:
+                due_date = entry["due_date"]  
+                now = datetime.now()
 
-            due_date = entry["due_date"]  
-            now = datetime.now()
-
-            delta = due_date - now  
-            total_hours = delta.total_seconds() / 3600  
-            hours = int(total_hours)
-        
-            color = "#800707" if hours <= 2 else "#470881" if hours <= 5 else "#09428B"
+                delta = due_date - now  
+                total_hours = delta.total_seconds() / 3600  
+                hours = int(total_hours)
             
-            card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1, border_color=color)
-            card.pack(fill="x", padx=10, pady=5)
-            
-            action_label = ctk.CTkLabel(card, text=f"Due in {hours} hours", text_color=color, font=("Arial", 15, "bold"))
-            action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
+                color = "#800707" if hours <= 2 else "#470881" if hours <= 5 else "#09428B"
+                
+                card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1, border_color=color)
+                card.pack(fill="x", padx=10, pady=5)
+                
+                action_label = ctk.CTkLabel(card, text=f"Due in {hours} hours", text_color=color, font=("Arial", 15, "bold"))
+                action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
 
-            book_info = f"{entry['book_title']} (ID: {entry['rfid']})"
-            ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
+                book_info = f"{entry['book_title']} (ID: {entry['rfid']})"
+                ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
 
-            borrower = entry["user_name"]
-            user_id = entry['user_id']
-            footer = f"By: {borrower} [ {user_id} ]"
-            ctk.CTkLabel(card, text=footer, font=("Arial", 11, "italic")).grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")
+                borrower = entry["user_name"]
+                user_id = entry['user_id']
+                footer = f"By: {borrower} [ {user_id} ]"
+                ctk.CTkLabel(card, text=footer, font=("Arial", 11, "italic")).grid(row=2, column=0, padx=10, pady=(0, 5), sticky="w")
 

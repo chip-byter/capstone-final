@@ -90,12 +90,15 @@ class Inventory(ctk.CTkFrame):
     def on_book_click(self, book_data):
         BookDetailsWindow(self, book_data, on_update=self.refresh_books)
 
+ 
     def refresh_books(self):
-        for widget in self.book_grid.winfo_children():
-            widget.destroy()
-        self.book_grid.destroy()
+        self.book_grid = ''
+        if self.book_grid:
+            for widget in self.book_grid.winfo_children():
+                widget.destroy()
+            self.book_grid.destroy()
 
         books = self.get_books(self.current_query)
         self.book_grid = BookGrid(self.results_area, books=books, on_card_click=self.on_book_click)
         self.book_grid.grid(row=0, column=0, pady=10, sticky="nsew")
-        # self.update_idletasks()    
+        # self.update_idletasks()

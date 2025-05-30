@@ -12,7 +12,7 @@ class BookDetailsWindow(ctk.CTkToplevel):
         center_window(self, 450, 350)
         self.resizable(False, False)
         self.focus_force()   
-        self.grab_set()
+        # self.grab_set()
         self.on_update = on_update
 
         self.book = book_data or {}

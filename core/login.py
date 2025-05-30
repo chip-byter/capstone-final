@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from core.widgets import MessageBox
+from core.widgets import MessageBox, center_window
 from core.encryption import verify_user
 
 
@@ -61,12 +61,14 @@ class Login(ctk.CTkFrame):
 
 
         self.footer = ctk.CTkFrame(self.padding, fg_color="transparent")
-        self.footer.grid(row=2, column=0, pady=(20, 0), sticky="new")
+        self.footer.grid(row=2, column=0, pady=(5, 0), sticky="new")
         self.footer.grid_columnconfigure(0, weight=1)
 
+        self.change_password = ctk.CTkButton(self.footer, text="Forgot Password", font=("Hevetica", 11), width=50, fg_color="transparent" ,text_color="black", hover=None)
+        self.change_password.grid(row=0, column=0, sticky="e")
 
         self.signin_btn = ctk.CTkButton(self.footer, text="Sign In", height=30, command=self.authentication)
-        self.signin_btn.grid(row=0, column=0, sticky="ew")
+        self.signin_btn.grid(row=1, column=0, sticky="ew")
         self.password.bind("<Return>", lambda e:self.authentication())
 
     def search_field_focus(self, event):
@@ -93,3 +95,6 @@ class Login(ctk.CTkFrame):
         #     print("Access Granted")
         # else:
         #     print("Access Denied")
+
+    def change_password(self):
+        pass

@@ -2,30 +2,25 @@ from datetime import datetime, timedelta
 import mysql.connector 
 from mysql.connector import Error
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-# REMINDER : CREATE.env file
-# DB_HOST = localhost
-# DB_USER=root
-# DB_PASSWORD=admin123
-# DB_NAME=capstone
 
 
 class Database:
     def __init__(self):
-        load_dotenv()
+        
+        # load_dotenv()
 
-        DB_HOST = os.getenv("DB_HOST")
-        DB_USER = os.getenv("DB_USER")
-        DB_PASSWORD = os.getenv("DB_PASSWORD")
-        DB_NAME = os.getenv("DB_NAME")
+        # DB_HOST = os.getenv("DB_HOST")
+        # DB_USER = os.getenv("DB_USER")
+        # DB_PASSWORD = os.getenv("DB_PASSWORD")
+        # DB_NAME = os.getenv("DB_NAME")
 
         self.connection = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-            # database = 'Library'
+            host="localhost",
+            user="root",
+            password="admin123",
+            database="Library"
         )
         self.cursor = self.connection.cursor(dictionary=True)
 

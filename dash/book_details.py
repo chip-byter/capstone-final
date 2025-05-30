@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from core.database import Database
 from dash.newbookform import BookForm
-from core.widgets import ConfirmationDialog, center_window
+from core.widgets import ConfirmationDialog, MessageBox, center_window
 
 
 class BookDetailsWindow(ctk.CTkToplevel):
@@ -91,14 +91,24 @@ class BookDetailsWindow(ctk.CTkToplevel):
 
     def delete_book(self):
         db = Database()
-        confirm = ctk.CTkInputDialog(text=f"Type DELETE to confirm deletion of the book\n{self.book['book_title']}.", title="Confirm Book Deletion")
-        if confirm.get_input().strip().upper() == "DELETE":
-            db.execute_query("DELETE FROM books WHERE book_id = %s", (self.book['book_id'],))
+        def del_book():
+            db.execute_query("DELETE FROM book_items WHERE book_id = %s", (self.book['book_id'],))
             db.log_activity("Deleted", self.book['book_id'], self.book['book_title'])
             db.connection.commit()
-            if self.on_update:
-                self.on_update()
-            self.destroy()
+
+            def after_ok():
+                if self.on_update:
+                    self.on_update()
+                self.destroy()
+
+            MessageBox(self, "Deleted Successfully!", "The book is deleted succesfully!", after_ok)
+        
+            
+            
+
+        
+        ConfirmationDialog(self, f"Do you want to delete the book\n {self.book['book_title']}?", del_book)
+        
     
     def cancel(self):
         ConfirmationDialog(self, "Do you want to close this form?", self.destroy)

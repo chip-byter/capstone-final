@@ -29,7 +29,7 @@ class Overview(ctk.CTkFrame):
         self.create_summary_container("Available Books", 1, self.total_available())
         self.create_summary_container("Borrowed Books", 2, self.total_borrowed())
         self.create_summary_container("Overdue Books", 3, self.total_due())
-        self.create_summary_container("Lost Books", 4, self.total_lost())
+        self.create_summary_container("Lost & Damaged Books", 4, self.total_lost_damaged())
 
         self.notif_frame = ctk.CTkFrame(self.body_container, fg_color="transparent")
         self.notif_frame.grid(row=1, column=0, pady=(5,10), padx=10, sticky="nsew")
@@ -88,8 +88,8 @@ class Overview(ctk.CTkFrame):
         results = self.db.cursor.fetchone()
         return results['COUNT(*)']
     
-    def total_lost(self):
-        self.db.execute_query("SELECT COUNT(*) FROM book_items WHERE status = 'Lost'")
+    def total_lost_damaged(self):
+        self.db.execute_query("SELECT COUNT(*) FROM book_items WHERE status = 'Lost' OR status = 'Damaged'")
         results = self.db.cursor.fetchone()
         return results['COUNT(*)']
 
@@ -136,7 +136,7 @@ class Overview(ctk.CTkFrame):
             for key in self.get_book_details(log):
                 book_info = f"{key['book_title']} (ID: {key['book_id']})"
             
-            ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic")).grid(row=1, column=0, padx=10, sticky="w")
+            ctk.CTkLabel(card, text=book_info, font=("Arial", 13, "italic"), wraplength=280).grid(row=1, column=0, padx=10, sticky="w")
 
             performer = "System"
             timestamp = datetime.strptime(str(log["timestamp"]), "%Y-%m-%d %H:%M:%S")

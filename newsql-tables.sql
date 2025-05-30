@@ -29,12 +29,12 @@ CREATE TABLE `activity_log` (
   `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `rfid` (`rfid`),
-  FOREIGN KEY (`rfid`) REFERENCES `book_items` (`rfid`)
+  FOREIGN KEY (`rfid`) REFERENCES `book_items` (`rfid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) 
 
 CREATE TABLE `transactions` (
   `transaction_id` INT NOT NULL AUTO_INCREMENT,
-  `rfid` VARCHAR(20) NOT NULL,
+  `rfid` VARCHAR(20) NULL,
   `user_id` VARCHAR(50) NOT NULL,
   `user_name` VARCHAR(100) DEFAULT NULL,
   `user_email` VARCHAR(100) DEFAULT NULL,
@@ -45,8 +45,9 @@ CREATE TABLE `transactions` (
   `overdue_notified` TINYINT(1) DEFAULT '0',
   PRIMARY KEY (`transaction_id`),
   KEY `rfid` (`rfid`),
-  FOREIGN KEY (`rfid`) REFERENCES `book_items` (`rfid`) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (`rfid`) REFERENCES `book_items` (`rfid`) ON DELETE CASCADE ON UPDATE CASCADE 
 ) 
+
 
 
 ----------------------------------  EVENTS  ----------------------------------

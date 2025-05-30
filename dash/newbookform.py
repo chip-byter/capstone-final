@@ -38,7 +38,12 @@ class BookForm(ctk.CTkToplevel):
         self.book_title_entry = self.create_labeled_entry("Title: ", 3, "Book Title")
         self.author_entry = self.create_labeled_entry("Author: ", 4, "Book Author")
         self.status_entry = self.create_labeled_entry("Status: ", 5, "'Available', 'Lost', 'Damaged', 'Borrowed'")
-        
+
+        # CHECKS EXISTING BOOKS
+        self.book_id_entry.bind("<FocusOut>", self.check_existing_book)
+        # ENABLE FIELDS 
+        self.book_id_entry.bind("<KeyRelease>", self.on_book_id_change)
+
         self.buttons = ctk.CTkFrame(self, fg_color="transparent")
         self.buttons.grid(row=1, column=0, sticky="ne")
 
@@ -77,6 +82,28 @@ class BookForm(ctk.CTkToplevel):
             "status": self.status_entry.get().strip(),
         }
 
+    def check_existing_book(self, event=None):
+        book_id = self.book_id_entry.get().strip()
+        if not book_id:
+            return
+
+        query = "SELECT book_title, book_author FROM books WHERE book_id = %s"
+        result = self.db.fetch_one(query, (book_id,))
+        
+        if result:
+            self.book_title_entry.delete(0, 'end')
+            self.book_title_entry.insert(0, result['book_title'])
+            self.author_entry.delete(0, 'end')
+            self.author_entry.insert(0, result['book_author'] or "")
+            
+            self.book_title_entry.configure(state="disabled")
+            self.author_entry.configure(state="disabled")
+
+    def on_book_id_change(self, event=None):
+        self.book_title_entry.configure(state="normal")
+        self.author_entry.configure(state="normal")
+        self.book_title_entry.delete(0, 'end')
+        self.author_entry.delete(0, 'end')
 
     def send_data(self):
         book = self.get_book_data()
@@ -85,10 +112,11 @@ class BookForm(ctk.CTkToplevel):
         book_title = book["title"]
         book_author = book["author"]
         book_status = book["status"]
+        book_exists = self.db.fetch_one("SELECT 1 FROM books WHERE book_id = %s", (book_id,))
 
         try:
             if self.book_data:
-                # === UPDATE MODE ===
+                # UPDATE BOOK
                 query_book = """
                 UPDATE books 
                 SET book_title = %s, book_author = %s,
@@ -109,8 +137,16 @@ class BookForm(ctk.CTkToplevel):
                 self.db.log_activity("Updated", book_rfid, user_name="Admin")
                 print(f"Book '{book_title}' updated successfully.")
 
+            elif book_exists:
+                query_item = """
+                INSERT INTO book_items (book_id, rfid, status)
+                VALUES (%s, %s, %s)
+                """
+                self.db.execute_query(query_item, (book_id, book_rfid, book_status))
+                self.db.log_activity("New Copy Added", book_rfid, user_name="Admin")
+                
             else:
-                # === ADD MODE ===
+                # ADD BOOK
                 query_book = """
                 INSERT INTO books (book_id, book_title, book_author) 
                 VALUES (%s, %s, %s, %s)

@@ -2,25 +2,29 @@ from datetime import datetime, timedelta
 import mysql.connector 
 from mysql.connector import Error
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 
 
 class Database:
     def __init__(self):
         
-        # load_dotenv()
+        load_dotenv()
 
-        # DB_HOST = os.getenv("DB_HOST")
-        # DB_USER = os.getenv("DB_USER")
-        # DB_PASSWORD = os.getenv("DB_PASSWORD")
-        # DB_NAME = os.getenv("DB_NAME")
+        DB_HOST = os.getenv("DB_HOST")
+        DB_USER = os.getenv("DB_USER")
+        DB_PASSWORD = os.getenv("DB_PASSWORD")
+        DB_NAME = os.getenv("DB_NAME")
 
         self.connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="admin123",
-            database="Library"
+            # host="localhost",
+            # user="root",
+            # password="admin123",
+            # database="Library"
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
         )
         self.cursor = self.connection.cursor(dictionary=True)
 
@@ -162,33 +166,15 @@ class Database:
         except Error as e:
             self.connection.rollback()  
             print(f"Return Book Error: {e}")
-
-    def reset_table(self, table_name:str):
-        """ DELETE ALL ROWS OF THE TABLE
-
-            ---
-            table_name: 
-            - `books`
-            - `transactions`
-            - `accounts`
-
-        """
-        try: 
-            self.cursor.execute(f"DELETE FROM {table_name}")
-            self.con().commit()
-        except Error as e:
-            print(f"[ERROR] : {e}")
-        # finally:
-        #     if self is not None and self.con.is_connected():
-        #         self.cursor.close()
-        #         self.con.close()
-        #         print("Database is closed!")
+   
 
     def generate_path(self, title:str):
         modified_title = title.lower().replace(" ", "-") + ".jpg"
-        path = f"assets/book_covers/{modified_title}"
+        path = f"book_covers/{modified_title}"
         return path
     
+
+
 if __name__ == "__main__":
     db = Database()
     
@@ -198,4 +184,8 @@ if __name__ == "__main__":
     # title = "1984"
     # book_id = db.fetch_one("SELECT book_id FROM books WHERE book_title = %s", (title, ))
     # print(book_id["book_id"])
-    print(db.get_overdue_books())
+    # db.execute_query("DELETE FROM books WHERE book_id = %s", ('A000', ))
+    # db.connection.commit()
+    results = db.fetch_all("SELECT COUNT(*) FROM book_items WHERE book_id = %s", ('A111', ))
+    print(results)
+    

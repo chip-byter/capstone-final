@@ -44,7 +44,7 @@ class BookCard(ctk.CTkFrame):
         super().__init__(parent, corner_radius=10, border_width=1)
         self.book_data = book_data
         self.on_click = on_click
-        self.default_image_path = "assets/book_covers/default_cover.png"
+        self.default_image_path = "book_covers/default_cover.png"
         
         book_title = book_data['book_title']
         book_author = book_data['book_author']

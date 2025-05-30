@@ -88,7 +88,7 @@ class Inventory(ctk.CTkFrame):
             return db.fetch_all(q) 
 
     def on_book_click(self, book_data):
-        BookDetailsWindow(self, book_data)
+        BookDetailsWindow(self, book_data, self.refresh_books)
 
  
     def refresh_books(self):

@@ -40,7 +40,7 @@ class BookForm(ctk.CTkToplevel):
         self.book_title_entry = self.create_labeled_entry("Title: ", 3, "Book Title")
         self.author_entry = self.create_labeled_entry("Author: ", 4, "Book Author")
         self.status_entry = self.create_labeled_entry("Status: ", 5, "'Available', 'Lost', 'Damaged', 'Borrowed'")
-
+       
         # CHECKS EXISTING BOOKS
         self.book_id_entry.bind("<FocusOut>", self.check_existing_book)
         # ENABLE FIELDS 
@@ -115,58 +115,50 @@ class BookForm(ctk.CTkToplevel):
         book_author = book["author"]
         book_status = book["status"]
         book_cover = self.db.generate_path(book_title)
-        book_exists = self.db.fetch_one("SELECT 1 FROM books WHERE book_id = %s", (book_id,))
 
         try:
-            if self.book_data:
-                # UPDATE BOOK
+            # Check if book exists
+            book_exists = self.db.fetch_one("SELECT 1 FROM books WHERE book_id = %s", (book_id,))
+            
+            # Check if this specific book item exists
+            item_exists = self.db.fetch_one("SELECT 1 FROM book_items WHERE rfid = %s", (book_rfid,))
+            
+            if book_exists:
+                # Update the book metadata
                 query_book = """
-                UPDATE books 
-                SET book_title = %s, book_author = %s,
-                WHERE book_id = %s
+                    UPDATE books 
+                    SET book_title = %s, book_author = %s
+                    WHERE book_id = %s
                 """
-                metadata = (book_title, book_author, book_id)
-                self.db.execute_query(query_book, metadata)
-
-                query_item = """
-                UPDATE book_items 
-                SET rfid = %s, status = %s 
-                WHERE book_id = %s
+                self.db.execute_query(query_book, (book_title, book_author, book_id))
+            else:
+                # Insert new book
+                query_book = """
+                    INSERT INTO books (book_id, book_title, book_author, cover)
+                    VALUES (%s, %s, %s, %s)
                 """
-                item_data = (book_rfid, book_status, book_id)
-                self.db.execute_query(query_item, item_data)
-
-                self.db.connection.commit()
-                self.db.log_activity("Updated", book_rfid, user_name="Admin")
-                print(f"Book '{book_title}' updated successfully.")
-
-            elif book_exists:
+                self.db.execute_query(query_book, (book_id, book_title, book_author, book_cover))
+            
+            if item_exists:
+                # Update existing book item (copy)
                 query_item = """
-                INSERT INTO book_items (book_id, rfid, status)
-                VALUES (%s, %s, %s)
+                    UPDATE book_items 
+                    SET status = %s 
+                    WHERE rfid = %s
+                """
+                self.db.execute_query(query_item, (book_status, book_rfid))
+                self.db.log_activity("Updated Copy", book_rfid, user_name="Admin")
+            else:
+                # Add new book item (copy)
+                query_item = """
+                    INSERT INTO book_items (book_id, rfid, status)
+                    VALUES (%s, %s, %s)
                 """
                 self.db.execute_query(query_item, (book_id, book_rfid, book_status))
                 self.db.log_activity("New Copy Added", book_rfid, user_name="Admin")
-                
-            else:
-                # ADD BOOK
-                query_book = """
-                INSERT INTO books (book_id, book_title, book_author, cover) 
-                VALUES (%s, %s, %s, %s)
-                """
-                metadata = (book_id, book_title, book_author, book_cover)
-                self.db.execute_query(query_book, metadata)
 
-                query_item = """
-                INSERT INTO book_items (book_id, rfid, status)
-                VALUES (%s, %s, %s)
-                """
-                item_data = (book_id, book_rfid, book_status)
-                self.db.execute_query(query_item, item_data)
-
-                self.db.connection.commit()
-                self.db.log_activity("Added", book_rfid, user_name="Admin")
-                print(f"Book '{book_title}' added successfully.")
+            self.db.connection.commit()
+            print(f"Book '{book_title}' processed successfully.")
 
         except Exception as e:
             print("Database operation failed:", e)

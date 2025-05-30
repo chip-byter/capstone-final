@@ -12,7 +12,6 @@ class BookDetailsWindow(ctk.CTkToplevel):
         center_window(self, 450, 350)
         self.resizable(False, False)
         self.focus_force()   
-        # self.grab_set()
         self.on_update = on_update
 
         self.book = book_data or {}
@@ -68,7 +67,6 @@ class BookDetailsWindow(ctk.CTkToplevel):
                 self.on_update()
             self.destroy()
 
-        # BookForm(self, self.book_data, on_update=after_update)
         BookForm(self, self.book, on_update=after_update)
 
     def get_book_data(self):
@@ -89,11 +87,20 @@ class BookDetailsWindow(ctk.CTkToplevel):
         self.author_entry.configure(text=book['author'])
         self.status_entry.configure(text=book['status'])
 
+    
     def delete_book(self):
         db = Database()
+        
         def del_book():
-            db.execute_query("DELETE FROM book_items WHERE book_id = %s", (self.book['book_id'],))
-            db.log_activity("Deleted", self.book['book_id'], self.book['book_title'])
+            rfid = self.book['rfid']
+            book_id = self.book['book_id']
+            
+            db.execute_query("DELETE FROM book_items WHERE rfid = %s", (rfid,))
+            remaining = db.fetch_one("SELECT COUNT(*) AS count FROM book_items WHERE book_id = %s", (book_id,))
+            
+            if remaining['count'] == 0:
+                db.execute_query("DELETE FROM books WHERE book_id = %s", (book_id,))
+            
             db.connection.commit()
 
             def after_ok():
@@ -101,14 +108,14 @@ class BookDetailsWindow(ctk.CTkToplevel):
                     self.on_update()
                 self.destroy()
 
-            MessageBox(self, "Deleted Successfully!", "The book is deleted succesfully!", after_ok)
-        
-            
-            
+            MessageBox(self, "Deleted Successfully!", "The book copy has been deleted successfully!", after_ok)
 
-        
-        ConfirmationDialog(self, f"Do you want to delete the book\n {self.book['book_title']}?", del_book)
-        
-    
+        ConfirmationDialog(
+            self,
+            f"Do you want to delete the copy with RFID {self.book['rfid']} of '{self.book['book_title']}'?\n"
+            "If this is the last copy, the book metadata will also be deleted.",
+            del_book
+        )
+
     def cancel(self):
         ConfirmationDialog(self, "Do you want to close this form?", self.destroy)

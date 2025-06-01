@@ -1,17 +1,33 @@
 from datetime import datetime, timedelta
 import mysql.connector 
 from mysql.connector import Error
+import os
+from dotenv import load_dotenv
+
+# REMINDER : CREATE.env file
+# DB_HOST = localhost
+# DB_USER=root
+# DB_PASSWORD=admin123
+# DB_NAME=capstone
+
 
 class Database:
     def __init__(self):
-       self.connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="admin123",
-            # database="capstone"
-            database = 'Library'
+        load_dotenv()
+
+        DB_HOST = os.getenv("DB_HOST")
+        DB_USER = os.getenv("DB_USER")
+        DB_PASSWORD = os.getenv("DB_PASSWORD")
+        DB_NAME = os.getenv("DB_NAME")
+
+        self.connection = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+            # database = 'Library'
         )
-       self.cursor = self.connection.cursor(dictionary=True)
+        self.cursor = self.connection.cursor(dictionary=True)
 
     def execute_query(self, query, params=None):
         self.cursor.execute(query, params)
@@ -59,8 +75,8 @@ class Database:
             """
 
         if query:
-            q += " WHERE books.book_title LIKE %s OR books.book_author LIKE %s"
-            params = (f"%{query}%", f"%{query}%")
+            q += " WHERE books.book_title LIKE %s OR books.book_author LIKE %s or book_items.rfid = %s"
+            params = (f"%{query}%", f"%{query}%", query)
             return q, params
         
         return q

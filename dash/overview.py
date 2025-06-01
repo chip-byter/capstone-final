@@ -163,7 +163,7 @@ class Overview(ctk.CTkFrame):
         FROM transactions t
         JOIN book_items bi ON bi.rfid = t.rfid
         JOIN books b ON b.book_id = bi.book_id
-        WHERE t.status = 'Borrowed' ORDER BY borrowed_date DESC LIMIT %s
+        WHERE t.status = 'Borrowed' OR t.status = 'Overdue' ORDER BY borrowed_date DESC LIMIT %s
         """
         
         return db.fetch_all(query, (limit, ))
@@ -181,13 +181,16 @@ class Overview(ctk.CTkFrame):
                 delta = due_date - now  
                 total_hours = delta.total_seconds() / 3600  
                 hours = int(total_hours)
-            
+
+                overdue_txt = 'Overdue' if due_date <= now else f"Due in {hours} hours"
+                
+
                 color = "#800707" if hours <= 2 else "#470881" if hours <= 5 else "#09428B"
                 
                 card = ctk.CTkFrame(self.returns_list, corner_radius=10, border_width=1, border_color=color)
                 card.pack(fill="x", padx=10, pady=5)
                 
-                action_label = ctk.CTkLabel(card, text=f"Due in {hours} hours", text_color=color, font=("Arial", 15, "bold"))
+                action_label = ctk.CTkLabel(card, text=overdue_txt, text_color=color, font=("Arial", 15, "bold"))
                 action_label.grid(row=0, column=0, padx=10, pady=(5, 0), sticky="w")
 
                 book_info = f"{entry['book_title']} (ID: {entry['rfid']})"

@@ -28,7 +28,7 @@ class BookDetailsWindow(ctk.CTkToplevel):
   
         # BOOK DETAILS
         self.book_id_entry = self.create_labeled_entry("Book ID: ", 1, "Book ID")
-        self.rfid_entry = self.create_labeled_entry("RFID: ", 2, "RFID")
+        self.rfid_entry = self.create_labeled_entry("RFID: ", 2, "NFC")
         self.book_title_entry = self.create_labeled_entry("Title: ", 3, "Book Title")
         self.author_entry = self.create_labeled_entry("Author: ", 4, "Book Author")
         self.status_entry = self.create_labeled_entry("Status: ", 5, "'Available', 'Lost', 'Damaged', 'Borrowed'")

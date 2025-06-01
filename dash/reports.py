@@ -76,7 +76,7 @@ class Reports(ctk.CTkFrame):
         self.tree = ttk.Treeview(self.tree_frame, columns=self.columns, show='headings')
 
         column_titles = {
-            "rfid": "RFID",
+            "rfid": "NFC",
             "user_id": "User ID",
             "borrowed_date": "Borrow Date",
             "due_date": "Due Date",
@@ -138,7 +138,7 @@ class Reports(ctk.CTkFrame):
                     "book_id": "Book ID",
                     "book_title": "Title",
                     "book_author": "Author",
-                    "rfid": "RFID",
+                    "rfid": "NFC",
                     "status": "Status"
                 }
 
@@ -163,7 +163,7 @@ class Reports(ctk.CTkFrame):
 
                 self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "status")
                 column_titles = {
-                    "rfid": "RFID",
+                    "rfid": "NFC",
                     "user_id": "User ID",
                     "borrowed_date": "Borrow Date",
                     "due_date": "Due Date",

@@ -24,7 +24,7 @@ class ScanBookFrame(ctk.CTkFrame):
     def set_user(self, user_data):
         self.user = user_data
         self.label_subheading.configure(text=f"User: {self.user['name']} \n (ID: {self.user['id']})")
-        self.label_heading.configure(text="Please scan the book RFID...")
+        self.label_heading.configure(text="Please scan the book NFC tag...")
         self.start_rfid_listener()
 
     def start_rfid_listener(self):
@@ -64,14 +64,14 @@ class ScanBookFrame(ctk.CTkFrame):
             book = self.db.get_book_by_rfid(rfid_tag)
 
             if not book:
-                self.display_error(f"No book found for RFID: {rfid_tag}")
+                self.display_error(f"No book found for NFC: {rfid_tag}")
                 self.start_rfid_listener()
                 return
 
             rfid = book["rfid"]
             book_title = book["book_title"] 
             self.label_heading.configure(text="Successful!")
-            self.label_subheading.configure(text=f"Scanned RFID: {rfid_tag}\nBook Title: {book_title}")
+            self.label_subheading.configure(text=f"Scanned NFC: {rfid_tag}\nBook Title: {book_title}")
 
             self.process_transaction(rfid, book_title)
             self.winfo_toplevel().unbind_all("<Key>")

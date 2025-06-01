@@ -72,7 +72,7 @@ class Reports(ctk.CTkFrame):
         self.next_button = ctk.CTkButton(self.pagination_frame, text=" Next > ", fg_color="transparent" , width=80, hover=None, text_color="black", command=self.next_page)
         self.next_button.grid(row=0, column=2, padx=5)
 
-        self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "status")
+        self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "return_date", "status")
         self.tree = ttk.Treeview(self.tree_frame, columns=self.columns, show='headings')
 
         column_titles = {
@@ -80,6 +80,7 @@ class Reports(ctk.CTkFrame):
             "user_id": "User ID",
             "borrowed_date": "Borrow Date",
             "due_date": "Due Date",
+            "return_date": "Return Date",
             "status": "Status"
         }
 
@@ -144,7 +145,7 @@ class Reports(ctk.CTkFrame):
 
         if mode == "Transactions":
             if selected in ["Borrowed Books", "Overdue Books", "Returned Books"]:
-                query = "SELECT rfid, user_id, borrowed_date, due_date, status FROM transactions"
+                query = "SELECT rfid, user_id, borrowed_date, due_date, return_date, status FROM transactions"
                 params = []
 
                 if selected == "Borrowed Books":
@@ -161,16 +162,17 @@ class Reports(ctk.CTkFrame):
                         query += " WHERE borrowed_date BETWEEN %s AND %s"
                     params.extend([start, end])
 
-                self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "status")
+                self.columns = ("rfid", "user_id", "borrowed_date", "due_date", "return_date", "status")
                 column_titles = {
                     "rfid": "NFC",
                     "user_id": "User ID",
                     "borrowed_date": "Borrow Date",
                     "due_date": "Due Date",
+                    "return_date": "Return Date",
                     "status": "Status"
                 }
 
-        self.report_data = self.db.fetch_all(query, tuple(params))
+        self.report_data = self.db.fetch_all(query, tuple(params)) or []
         self.total_label.configure(text=f"Total {selected}: {len(self.report_data)}")
         self.update_treeview_headers(column_titles)
         self.current_page = 1

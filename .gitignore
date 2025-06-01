@@ -7,3 +7,6 @@ __pycache__/
 .env
 *.jpg
 *.png
+dist
+main.spec
+build

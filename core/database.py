@@ -114,6 +114,23 @@ class Database:
         """
 
         return self.fetch_all(query)
+    
+    
+    def mark_overdue_notified(self, rfid):
+        query = """
+            UPDATE transactions
+            SET overdue_notified = TRUE
+            WHERE rfid = %s
+            AND status = 'Overdue'
+        """
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query, (rfid,))
+            self.connection.commit()
+            cursor.close()
+        except Exception as e:
+            print(f"Failed to mark overdue notified for RFID {rfid}: {e}")
+
 
     def get_book_status(self, rfid, user_id):
         query = """
@@ -136,7 +153,7 @@ class Database:
         if due_days:
             delta += timedelta(days=due_days)
         if due_hours:
-            delta += timedelta(hours=due_hours)
+            delta += timedelta(minutes=due_hours)
         due_date = datetime.now() + delta if delta else None
 
         try:

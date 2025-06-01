@@ -1,5 +1,13 @@
+import os
+import sys
 import customtkinter as ctk
 from PIL import Image, ImageTk
+
+def resource_path(relative_path):
+    base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    normalized_path = os.path.normpath(relative_path)
+    return os.path.join(base_path, normalized_path)
+    
 
 # ---------------------------------- CENTER WINDOW FUNCTION ----------------------------------------------
 def center_window(frame, width:int, height:int):
@@ -44,12 +52,12 @@ class BookCard(ctk.CTkFrame):
         super().__init__(parent, corner_radius=10, border_width=1)
         self.book_data = book_data
         self.on_click = on_click
-        self.default_image_path = "book_covers/default_cover.png"
+        self.default_image_path = resource_path("book_covers/default_cover.png")
         
         book_title = book_data['book_title']
         book_author = book_data['book_author']
         book_status = book_data.get('status', 'UNKOWN')
-        book_cover = book_data['cover']
+        book_cover = resource_path(book_data['cover'])
         # self.grid_columnconfigure(0, weight=1)
         # Load book cover image
         try:

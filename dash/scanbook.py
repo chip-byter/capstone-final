@@ -118,7 +118,7 @@ class ScanBookFrame(ctk.CTkFrame):
 
     def borrow_book_flow(self, user_id, rfid, book_title, user_name, user_email):
         # SPECIFY TIME FOR DUE DATE
-        due_date = self.db.borrow_book(user_id, user_name, user_email, rfid, due_hours=8)
+        due_date = self.db.borrow_book(user_id, user_name, user_email, rfid, due_hours=1)
         if not due_date:
             self.display_error("Failed to borrow the book.")
             self.start_rfid_listener()

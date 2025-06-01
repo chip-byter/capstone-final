@@ -90,7 +90,8 @@ class Transactions(ctk.CTkFrame):
             body_html = core.emailsys.generate_email_template(user_name, book_title, body_text)
             core.emailsys.send_notification_email(user_email, subject, body_text, body_html)
             
-        
+            db.mark_overdue_notified(rfid)
+            
         print(f"Checked and sent emails for {len(overdues)} overdue book(s).")
             
 if __name__ == "__main__":

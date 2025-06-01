@@ -36,7 +36,7 @@ class Organicer(ctk.CTk):
         self.dashboardPage = Dashboard(self, self)
         self.dashboardPage.grid(row=0, column=0, sticky="nsew")
 
-    def overdue_checker(self, interval_seconds=3600):  # 86400 = 24 hours
+    def overdue_checker(self, interval_seconds=30):  # 1200 = 1 Hour
         def loop():
             while True:
                 Transactions.handle_overdue_books()

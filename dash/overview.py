@@ -179,10 +179,10 @@ class Overview(ctk.CTkFrame):
                 now = datetime.now()
 
                 delta = due_date - now  
-                total_hours = delta.total_seconds() / 3600  
+                total_hours = delta.total_seconds() / 60  
                 hours = int(total_hours)
 
-                overdue_txt = 'Overdue' if due_date <= now else f"Due in {hours} hours"
+                overdue_txt = 'Overdue' if due_date <= now else f"Due in {hours} minutes"
                 
 
                 color = "#800707" if hours <= 2 else "#470881" if hours <= 5 else "#09428B"
